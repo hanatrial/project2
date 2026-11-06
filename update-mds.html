@@ -2,7 +2,9 @@
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Update untuk MDS</title>
 <meta name="theme-color" content="#072E23">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="manifest" href="manifest-mds.webmanifest">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Update MDS">
+<link rel="icon" type="image/png" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -23,6 +25,13 @@ h1{font-size:26px;font-weight:800;margin:10px 0 6px;letter-spacing:-.02em}
 .go{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:#072E23;color:#CFE7D5;text-decoration:none;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px}
 .go:hover{background:#1D4D43}
 @media(prefers-color-scheme:dark){.go{background:#CFE7D5;color:#072E23}}
+.must{background:#072E23;color:#E3F0E6;border:2px solid #F59E0B;border-radius:18px;padding:18px;margin-bottom:20px;box-shadow:0 10px 28px rgba(7,46,35,.28)}
+.must .tag{display:inline-block;background:#F59E0B;color:#072E23;font-weight:800;font-size:11px;letter-spacing:.12em;padding:3px 12px;border-radius:20px}
+.must h2{font-size:19px;font-weight:800;margin:10px 0 6px;line-height:1.25}.must p{font-size:13px;line-height:1.6;color:#B9D3C4}
+.must ol{padding-left:18px;font-size:13px;line-height:1.7;margin-top:8px;color:#E3F0E6}
+.inst{display:flex;width:100%;justify-content:center;align-items:center;gap:8px;margin-top:14px;background:#F59E0B;color:#072E23;border:0;border-radius:12px;padding:14px;font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+.inst:active{transform:scale(.98)}
+.ok{margin-top:14px;background:rgba(207,231,213,.14);border-radius:12px;padding:12px;text-align:center;font-weight:800;color:#CFE7D5}
 .foot{text-align:center;font-size:11px;color:var(--t2);margin-top:24px}
 </style></head><body>
 <div class="top">Update untuk MDS</div>
@@ -30,6 +39,12 @@ h1{font-size:26px;font-weight:800;margin:10px 0 6px;letter-spacing:-.02em}
 <span class="eye">Nutrifood Sulawesi</span>
 <h1>Yang perlu dikerjakan MDS</h1>
 <p class="sub">Daftar update dan tugas untuk MDS. Ketuk tombol di tiap poin untuk langsung membuka halamannya.</p>
+<div class="must" id="must">
+  <span class="tag">WAJIB</span>
+  <h2>Semua MDS wajib install halaman ini di HP</h2>
+  <p>Supaya daftar tugas selalu ada di layar utama dan bisa dibuka cepat, tanpa cari-cari link lagi.</p>
+  <div id="how"></div>
+</div>
 <div id="list"></div>
 <div class="foot" id="f"></div>
 </main>
@@ -43,4 +58,18 @@ const TUGAS=[
 ];
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 document.getElementById('list').innerHTML=TUGAS.map((t,i)=>`<div class="t"><div class="no">${i+1}</div><div><h2>${esc(t.judul)}</h2>${t.ket?`<p>${esc(t.ket)}</p>`:''}<a class="go" href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.tombol||'Buka')} ↗</a></div></div>`).join('');
+
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone,isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const how=document.getElementById('how');let dp=null;
+function renderHow(){
+  if(standalone){document.getElementById('must').style.display='none';return}
+  how.innerHTML=(isIOS?'<ol><li>Buka halaman ini di <b>Safari</b>.</li><li>Ketuk tombol <b>Bagikan</b> (kotak berpanah ↑).</li><li>Pilih <b>Tambah ke Layar Utama</b>, lalu <b>Tambah</b>.</li></ol>':
+   '<button class="inst" id="ib">⬇ INSTALL SEKARANG</button><ol id="man" style="display:none"><li>Buka menu browser <b>⋮</b> (pojok kanan atas).</li><li>Pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>.</li></ol>');
+  const ib=document.getElementById('ib');
+  if(ib)ib.onclick=async()=>{if(dp){dp.prompt();await dp.userChoice;dp=null}else document.getElementById('man').style.display='block'};
+}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e});
+addEventListener('appinstalled',()=>{how.innerHTML='<div class="ok">✓ Sudah terpasang. Buka lewat ikon di layar utama.</div>'});
+renderHow();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
