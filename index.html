@@ -94,7 +94,7 @@ function render(){
     $('t').textContent=repo.name;$('s').textContent=repo.items.length+' halaman HTML · klik untuk membuka';$('st').innerHTML='';
     const L=repo.items.filter(i=>i.f.toLowerCase().includes(k)).sort((a,b)=>fh(b.f)-fh(a.f)||a.f.localeCompare(b.f));
     v.innerHTML='<button class="back" onclick="location.hash=\'\'">← Semua repo</button><div class="list '+col(idx)+'">'+
-      (L.map(i=>{const p=i.f.split('/'),nm=p.pop();return `<a class="row ${col(idx)}" onclick="hit('${esc(r)}/${esc(i.f)}')" href="${esc(i.u)}" target="_blank" rel="noopener"><div style="flex:1;min-width:0"><div class="n">${esc(nm)}</div>${p.length?`<div class="d">${esc(p.join('/'))}/</div>`:''}</div><span class="go">↗</span></a>`}).join('')||'<div class="empty">Tidak ada yang cocok.</div>')+'</div>';
+      (L.map(i=>{const p=i.f.split('/'),nm=p.pop();return `<a class="row ${col(idx)}" onclick="hit('${esc(r)}/${esc(i.f)}')" onauxclick="hit('${esc(r)}/${esc(i.f)}')" href="${esc(i.u)}" target="_blank" rel="noopener"><div style="flex:1;min-width:0"><div class="n">${esc(nm)}</div>${p.length||fh(i.f)?`<div class="d">${esc(p.length?p.join('/')+'/':'')}${p.length&&fh(i.f)?' · ':''}${fh(i.f)?'dibuka '+fh(i.f)+'×':''}</div>`:''}</div><span class="go">↗</span></a>`}).join('')||'<div class="empty">Tidak ada yang cocok.</div>')+'</div>';
   }else{
     $('t').textContent='Semua Repo';$('s').textContent='Urut: paling sering dibuka, lalu paling baru diperbarui';
     $('st').innerHTML=`<div class="st"><b>${D.repos.length}</b><span>Repo</span></div><div class="st"><b>${total}</b><span>Halaman HTML</span></div>`;
@@ -116,5 +116,6 @@ if(!standalone){
 }
 addEventListener('appinstalled',()=>{ins.style.display='none'});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});addEventListener('pageshow',render);
 addEventListener('hashchange',()=>{q.value='';render();scrollTo(0,0)});q.addEventListener('input',render);render();
 </script></body></html>
