@@ -38,7 +38,8 @@ h1{font-size:26px;font-weight:800;margin:10px 0 6px;letter-spacing:-.02em}
 const TUGAS=[
   {judul:'Beli Barang dan Validasi Display Wow',ket:'',link:'https://hanatrial.github.io/VISIT/',tombol:'Buka MDS Visit'},
   {judul:'Visit Toko Bulanan',ket:'',link:'https://hanatrial.github.io/noo/visit-mds.html',tombol:'Buka Visit MDS'},
-  {judul:'Konsinyasi (khusus Bulukumba)',ket:'Khusus MDS Bulukumba.',link:'https://hanatrial.github.io/noo/konsinyasi/',tombol:'Buka Konsinyasi'}
+  {judul:'Konsinyasi (khusus Bulukumba)',ket:'Khusus MDS Bulukumba.',link:'https://hanatrial.github.io/noo/konsinyasi/',tombol:'Buka Konsinyasi'},
+  {judul:'Report Harian (Khusus MDS Stay)',ket:'Khusus MDS Stay.',link:'https://hanatrial.github.io/VISIT/',tombol:'Buka MDS Visit'}
 ];
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 document.getElementById('list').innerHTML=TUGAS.map((t,i)=>`<div class="t"><div class="no">${i+1}</div><div><h2>${esc(t.judul)}</h2>${t.ket?`<p>${esc(t.ket)}</p>`:''}<a class="go" href="${esc(t.link)}" target="_blank" rel="noopener">${esc(t.tombol||'Buka')} ↗</a></div></div>`).join('');
