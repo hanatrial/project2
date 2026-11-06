@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daftar Halaman HTML</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--tx:#1d2733;--mu:#667085;--bd:#dfe4ea;--ac:#1a73e8}
+@media(prefers-color-scheme:dark){:root{--bg:#12171d;--card:#1b222b;--tx:#e7ecf2;--mu:#98a2b3;--bd:#2b3540;--ac:#6ea8fe}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:8px 0 4px}.mu{color:var(--mu);font-size:13px}
+input{width:100%;padding:10px 12px;margin:12px 0;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card,.row{background:var(--card);border:1px solid var(--bd);border-radius:10px;text-decoration:none;color:var(--tx)}
+.card{padding:14px;cursor:pointer;display:block;text-align:left;font:inherit}
+.card b{display:block;font-size:16px}.card:hover,.row:hover{border-color:var(--ac)}
+.row{display:block;padding:11px 14px;margin-bottom:8px;word-break:break-all}
+.back{background:none;border:0;color:var(--ac);font:inherit;cursor:pointer;padding:4px 0}
+</style></head><body><main>
+<h1 id="t">Daftar Halaman HTML</h1><div class="mu" id="s"></div>
+<input id="q" placeholder="Cari repo atau halaman…" autocomplete="off">
+<div id="v"></div></main>
+<script>
+const D=/*DATA*/null,v=document.getElementById('v'),q=document.getElementById('q'),t=document.getElementById('t'),s=document.getElementById('s');
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n=D.repos.reduce((a,r)=>a+r.items.length,0);
+function render(){
+  const k=q.value.trim().toLowerCase(),r=decodeURIComponent(location.hash.slice(1));
+  const repo=D.repos.find(x=>x.name===r);
+  if(repo){
+    t.textContent=repo.name;s.textContent=repo.items.length+' halaman HTML';
+    const L=repo.items.filter(i=>i.f.toLowerCase().includes(k));
+    v.innerHTML='<button class="back" onclick="location.hash=\'\'">← Semua repo</button>'+
+      L.map(i=>`<a class="row" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.f)}</a>`).join('')||'<p class="mu">Tidak ada yang cocok.</p>';
+  }else{
+    t.textContent='Daftar Halaman HTML';s.textContent=D.repos.length+' repo · '+n+' halaman · diperbarui '+new Date(D.updated).toLocaleString('id-ID');
+    const L=D.repos.filter(x=>!k||x.name.toLowerCase().includes(k)||x.items.some(i=>i.f.toLowerCase().includes(k)));
+    v.innerHTML='<div class="grid">'+L.map(x=>`<button class="card" onclick="location.hash='${encodeURIComponent(x.name)}'"><b>${esc(x.name)}</b><span class="mu">${x.items.length} halaman</span></button>`).join('')+'</div>';
+  }
+}
+addEventListener('hashchange',()=>{q.value='';render()});q.addEventListener('input',render);render();
+</script></body></html>
