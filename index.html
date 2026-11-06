@@ -25,6 +25,10 @@ body{font-family:'Plus Jakarta Sans',-apple-system,system-ui,sans-serif;backgrou
 .pill{display:flex;align-items:center;gap:6px;background:rgba(207,231,213,.1);border:1px solid rgba(207,231,213,.25);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:#CFE7D5}
 .dot{width:6px;height:6px;border-radius:50%;background:#7EE0A8;box-shadow:0 0 8px #7EE0A8;animation:p 2s infinite}@keyframes p{50%{opacity:.35}}
 .right{display:flex;align-items:center;gap:10px}
+.ins{display:none;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:10px;border:0;background:#CFE7D5;color:#072E23;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.ins:hover{background:#fff}
+.tip{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:50;max-width:340px;width:calc(100% - 32px);background:#072E23;color:#E3F0E6;border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.5;box-shadow:0 14px 34px rgba(0,0,0,.4)}
+.tip b{color:#CFE7D5}.tip button{margin-top:8px;background:#CFE7D5;color:#072E23;border:0;border-radius:8px;padding:6px 14px;font:inherit;font-weight:800;cursor:pointer}
 .tg{width:34px;height:34px;border-radius:10px;border:1px solid rgba(207,231,213,.25);background:rgba(207,231,213,.08);color:#fff;cursor:pointer;font-size:15px}
 .tg:hover{background:rgba(207,231,213,.16)}
 main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:26px 18px 60px}
@@ -61,7 +65,7 @@ h1{font-size:28px;font-weight:800;margin:12px 0 4px;letter-spacing:-.02em}
 @media(max-width:560px){.top{padding:0 14px}.ts{display:none}h1{font-size:23px}.grid{grid-template-columns:1fr 1fr;gap:10px}.card{padding:14px}.pill{display:none}}
 </style></head><body>
 <div class="top"><div class="brand"><div class="orb">🗂️</div><div><div class="tt">Daftar Halaman HTML</div><div class="ts">Semua repo hanatrial</div></div></div>
-<div class="right"><div class="pill"><div class="dot"></div>Live</div><button class="tg" id="tg" title="Ganti tema">🌙</button></div></div>
+<div class="right"><button class="ins" id="ins">⬇ Install</button><div class="pill"><div class="dot"></div>Live</div><button class="tg" id="tg" title="Ganti tema">🌙</button></div></div>
 <main>
 <span class="eye">Nutrifood Sulawesi</span>
 <h1 id="t">Semua Repo</h1><div class="sub" id="s"></div>
@@ -94,6 +98,19 @@ function render(){
     v.innerHTML=L.length?'<div class="grid">'+L.map(([x,i])=>`<button class="card ${col(i)}" onclick="location.hash='${encodeURIComponent(x.name)}'"><div class="ic">${esc(x.name[0].toUpperCase())}</div><b>${esc(x.name)}</b><span>${x.items.length} halaman</span></button>`).join('')+'</div>':'<div class="empty">Tidak ada yang cocok.</div>';
   }
 }
+const ins=$('ins'),isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent),standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+let dp=null;
+if(!standalone){
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;ins.style.display='inline-flex'});
+  if(isIOS)ins.style.display='inline-flex';
+  ins.onclick=async()=>{
+    if(dp){dp.prompt();await dp.userChoice;dp=null;ins.style.display='none';return}
+    const t=document.createElement('div');t.className='tip';
+    t.innerHTML=isIOS?'Di Safari: ketuk tombol <b>Bagikan</b> (kotak berpanah ↑), lalu pilih <b>Tambah ke Layar Utama</b>.':'Buka menu browser (⋮) lalu pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>.';
+    const b=document.createElement('button');b.textContent='Mengerti';b.onclick=()=>t.remove();t.appendChild(b);document.body.appendChild(t);
+  };
+}
+addEventListener('appinstalled',()=>{ins.style.display='none'});
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 addEventListener('hashchange',()=>{q.value='';render();scrollTo(0,0)});q.addEventListener('input',render);render();
 </script></body></html>
