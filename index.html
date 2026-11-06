@@ -1,6 +1,11 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daftar Halaman HTML</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#072E23">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Daftar HTML"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -89,5 +94,6 @@ function render(){
     v.innerHTML=L.length?'<div class="grid">'+L.map(([x,i])=>`<button class="card ${col(i)}" onclick="location.hash='${encodeURIComponent(x.name)}'"><div class="ic">${esc(x.name[0].toUpperCase())}</div><b>${esc(x.name)}</b><span>${x.items.length} halaman</span></button>`).join('')+'</div>':'<div class="empty">Tidak ada yang cocok.</div>';
   }
 }
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 addEventListener('hashchange',()=>{q.value='';render();scrollTo(0,0)});q.addEventListener('input',render);render();
 </script></body></html>
