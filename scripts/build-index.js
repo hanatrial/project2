@@ -21,7 +21,7 @@ async function viaApi(){
     const s = SRC[r.name] || {branch:r.default_branch,dir:''};
     try{
       const t = await api(`/repos/${OWNER}/${r.name}/git/trees/${s.branch}?recursive=1`);
-      out.push({name:r.name,files:pick(t.tree.filter(x=>x.type==='blob').map(x=>x.path),s.dir),desc:r.description||''});
+      out.push({name:r.name,files:pick(t.tree.filter(x=>x.type==='blob').map(x=>x.path),s.dir),pushed:r.pushed_at||''});
     }catch(e){ console.error('lewati',r.name,e.message); }
   }
   return out;
@@ -35,7 +35,8 @@ function viaLocal(base){
     try{ cp.execSync(`git -C ${dir} fetch -q origin ${s.branch||''}`,{stdio:'ignore'}); }catch(e){}
     try{
       const ls = cp.execSync(`git -C ${dir} ls-tree -r --name-only ${ref}`,{encoding:'utf8'}).split('\n').filter(Boolean);
-      out.push({name,files:pick(ls,s.dir),desc:''});
+      let pushed='';try{pushed=cp.execSync(`git -C ${dir} log -1 --format=%cI ${ref}`,{encoding:'utf8'}).trim()}catch(e){}
+      out.push({name,files:pick(ls,s.dir),pushed});
     }catch(e){ console.error('lewati',name,e.message); }
   }
   return out;
@@ -46,7 +47,7 @@ const url = (repo,f)=>`https://${OWNER}.github.io/${repo}/`+f.replace(/(^|\/)ind
   const repos = (i>0 ? viaLocal(process.argv[i+1]) : await viaApi()).filter(r=>r.files.length)
     .sort((a,b)=>a.name.localeCompare(b.name,'id',{sensitivity:'base'}));
   repos.forEach(r=>r.items=r.files.map(f=>({f,u:url(r.name,f)})));
-  const data = {updated:new Date().toISOString(),repos:repos.map(r=>({name:r.name,home:url(r.name,''),items:r.items}))};
+  const data = {updated:new Date().toISOString(),repos:repos.map(r=>({name:r.name,home:url(r.name,''),pushed:r.pushed,items:r.items}))};
   const tpl = fs.readFileSync(path.join(__dirname,'template.html'),'utf8');
   const out = path.join(__dirname,'..','index.html');
   try{ const old = JSON.parse(fs.readFileSync(out,'utf8').match(/const D=(\{.*?\}),v=/s)[1]);
