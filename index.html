@@ -1,40 +1,93 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Daftar Halaman HTML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f5f7fa;--card:#fff;--tx:#1d2733;--mu:#667085;--bd:#dfe4ea;--ac:#1a73e8}
-@media(prefers-color-scheme:dark){:root{--bg:#12171d;--card:#1b222b;--tx:#e7ecf2;--mu:#98a2b3;--bd:#2b3540;--ac:#6ea8fe}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif}
-main{max-width:760px;margin:0 auto;padding:16px}
-h1{font-size:20px;margin:8px 0 4px}.mu{color:var(--mu);font-size:13px}
-input{width:100%;padding:10px 12px;margin:12px 0;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);font-size:15px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
-.card,.row{background:var(--card);border:1px solid var(--bd);border-radius:10px;text-decoration:none;color:var(--tx)}
-.card{padding:14px;cursor:pointer;display:block;text-align:left;font:inherit}
-.card b{display:block;font-size:16px}.card:hover,.row:hover{border-color:var(--ac)}
-.row{display:block;padding:11px 14px;margin-bottom:8px;word-break:break-all}
-.back{background:none;border:0;color:var(--ac);font:inherit;cursor:pointer;padding:4px 0}
-</style></head><body><main>
-<h1 id="t">Daftar Halaman HTML</h1><div class="mu" id="s"></div>
-<input id="q" placeholder="Cari repo atau halaman…" autocomplete="off">
-<div id="v"></div></main>
+:root{--bg:#030309;--bg2:#0a0a1e;--card:rgba(255,255,255,.04);--card-h:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+--t1:#F0F4FF;--t2:#7A88B0;--t3:#3A4568;--topbar:rgba(3,3,9,.88);--shadow:0 20px 50px rgba(0,0,0,.45);
+--green:#10B981;--violet:#8B5CF6;--cyan:#06B6D4;--pink:#EC4899;--amber:#F59E0B;--blue:#3B82F6}
+:root[data-theme=light]{--bg:#F3EFE4;--bg2:#fff;--card:rgba(255,255,255,.7);--card-h:#fff;--border:rgba(60,50,30,.1);--border2:rgba(60,50,30,.2);
+--t1:#2B2417;--t2:#6E6450;--t3:#A79C84;--topbar:rgba(255,255,255,.88);--shadow:0 14px 34px rgba(60,50,30,.14)}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+background:radial-gradient(ellipse 70% 50% at 8% 0%,rgba(139,92,246,.14) 0%,transparent 55%),radial-gradient(ellipse 55% 40% at 92% 15%,rgba(6,182,212,.1) 0%,transparent 50%),
+radial-gradient(ellipse 45% 35% at 50% 95%,rgba(16,185,129,.08) 0%,transparent 50%),radial-gradient(ellipse 40% 30% at 80% 75%,rgba(236,72,153,.08) 0%,transparent 50%)}
+.top{position:sticky;top:0;z-index:20;background:var(--topbar);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border);height:58px;padding:0 20px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.orb{width:32px;height:32px;border-radius:10px;background:conic-gradient(from 135deg,#8B5CF6,#06B6D4,#10B981,#EC4899,#8B5CF6);display:grid;place-items:center;font-size:15px;flex:none;box-shadow:0 4px 16px rgba(139,92,246,.35)}
+.tt{font-weight:800;font-size:15px;white-space:nowrap}.ts{font-size:11px;color:var(--t2);white-space:nowrap}
+.pill{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:var(--green)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:p 2s infinite}@keyframes p{50%{opacity:.35}}
+.right{display:flex;align-items:center;gap:10px}
+.tg{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--t1);cursor:pointer;font-size:15px}
+.tg:hover{border-color:var(--border2)}
+main{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:26px 18px 60px}
+.eye{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--violet);background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);padding:3px 12px;border-radius:20px}
+h1{font-size:28px;font-weight:800;margin:12px 0 4px;letter-spacing:-.02em}
+.sub{color:var(--t2);font-size:13px}
+.stats{display:flex;gap:10px;margin:18px 0 6px;flex-wrap:wrap}
+.st{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 16px;min-width:110px}
+.st b{display:block;font-size:22px;font-weight:800}.st span{font-size:11px;color:var(--t2)}
+.search{position:relative;margin:16px 0 20px}
+.search input{width:100%;padding:13px 16px 13px 42px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--t1);font:inherit;font-size:14px;outline:none;backdrop-filter:blur(10px)}
+.search input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.18)}
+.search i{z-index:1;pointer-events:none;position:absolute;left:15px;top:50%;transform:translateY(-50%);font-style:normal;opacity:.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px}
+.card{--c:var(--violet);position:relative;text-align:left;font:inherit;color:var(--t1);cursor:pointer;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;overflow:hidden;transition:transform .25s cubic-bezier(.32,.72,0,1),border-color .2s,background .2s,box-shadow .25s}
+.card::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--c);opacity:.9}
+.card::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:var(--c);opacity:.12;filter:blur(18px)}
+.card:hover{transform:translateY(-4px);border-color:var(--c);background:var(--card-h);box-shadow:var(--shadow)}
+.ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:16px;color:#fff;background:var(--c);margin-bottom:14px;position:relative;z-index:1}
+.card b{display:block;font-size:15px;font-weight:700;margin-bottom:2px;word-break:break-word;position:relative;z-index:1}
+.card span{font-size:12px;color:var(--t2);position:relative;z-index:1}
+.c0{--c:var(--violet)}.c1{--c:var(--cyan)}.c2{--c:var(--green)}.c3{--c:var(--pink)}.c4{--c:var(--amber)}.c5{--c:var(--blue)}
+.back{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);color:var(--t1);border-radius:20px;padding:6px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:6px}
+.back:hover{border-color:var(--border2)}
+.list{display:grid;gap:10px;margin-top:6px}
+.row{--c:var(--violet);display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--t1);background:var(--card);border:1px solid var(--border);border-left:3px solid var(--c);border-radius:14px;padding:13px 16px;transition:transform .2s,border-color .2s,background .2s}
+.row:hover{transform:translateX(4px);background:var(--card-h);border-color:var(--c)}
+.row .n{font-weight:700;font-size:14px;word-break:break-all;flex:1}.row .d{font-size:11px;color:var(--t2)}
+.row .go{color:var(--c);font-weight:800;flex:none}
+.empty{color:var(--t2);text-align:center;padding:40px 0}
+.foot{margin-top:30px;text-align:center;font-size:11px;color:var(--t3)}
+@media(max-width:560px){.top{padding:0 14px}.ts{display:none}h1{font-size:23px}.grid{grid-template-columns:1fr 1fr;gap:10px}.card{padding:14px}.pill{display:none}}
+</style></head><body>
+<div class="top"><div class="brand"><div class="orb">🗂️</div><div><div class="tt">Daftar Halaman HTML</div><div class="ts">Semua repo hanatrial</div></div></div>
+<div class="right"><div class="pill"><div class="dot"></div>Live</div><button class="tg" id="tg" title="Ganti tema">🌙</button></div></div>
+<main>
+<span class="eye">Nutrifood Sulawesi</span>
+<h1 id="t">Semua Repo</h1><div class="sub" id="s"></div>
+<div class="stats" id="st"></div>
+<div class="search"><i>🔎</i><input id="q" placeholder="Cari repo atau halaman…" autocomplete="off"></div>
+<div id="v"></div>
+<div class="foot" id="f"></div>
+</main>
 <script>
-const D={"updated":"2026-11-06T02:10:05.654Z","repos":[{"name":"den","home":"https://hanatrial.github.io/den/","items":[{"f":"public/index.html","u":"https://hanatrial.github.io/den/public/"}]},{"name":"dsbrdgpsbnd","home":"https://hanatrial.github.io/dsbrdgpsbnd/","items":[{"f":"dashboard_insentif_v2_15.html","u":"https://hanatrial.github.io/dsbrdgpsbnd/dashboard_insentif_v2_15.html"},{"f":"index.html","u":"https://hanatrial.github.io/dsbrdgpsbnd/"}]},{"name":"DUPLI","home":"https://hanatrial.github.io/DUPLI/","items":[{"f":"index.html","u":"https://hanatrial.github.io/DUPLI/"}]},{"name":"Gathering","home":"https://hanatrial.github.io/Gathering/","items":[{"f":"index.html","u":"https://hanatrial.github.io/Gathering/"}]},{"name":"insentif","home":"https://hanatrial.github.io/insentif/","items":[{"f":"bsp.html","u":"https://hanatrial.github.io/insentif/bsp.html"},{"f":"index.html","u":"https://hanatrial.github.io/insentif/"}]},{"name":"kdi","home":"https://hanatrial.github.io/kdi/","items":[{"f":"index.html","u":"https://hanatrial.github.io/kdi/"}]},{"name":"noo","home":"https://hanatrial.github.io/noo/","items":[{"f":"0f114d72ca/index.html","u":"https://hanatrial.github.io/noo/0f114d72ca/"},{"f":"dashboard.html","u":"https://hanatrial.github.io/noo/dashboard.html"},{"f":"index.html","u":"https://hanatrial.github.io/noo/"},{"f":"konsinyasi/index.html","u":"https://hanatrial.github.io/noo/konsinyasi/"},{"f":"stok-ancab.html","u":"https://hanatrial.github.io/noo/stok-ancab.html"},{"f":"stok-gimmick.html","u":"https://hanatrial.github.io/noo/stok-gimmick.html"},{"f":"visit-dashboard.html","u":"https://hanatrial.github.io/noo/visit-dashboard.html"},{"f":"visit-mds.html","u":"https://hanatrial.github.io/noo/visit-mds.html"},{"f":"wallpaper/index.html","u":"https://hanatrial.github.io/noo/wallpaper/"}]},{"name":"pcbkcots","home":"https://hanatrial.github.io/pcbkcots/","items":[{"f":"index.html","u":"https://hanatrial.github.io/pcbkcots/"}]},{"name":"project1","home":"https://hanatrial.github.io/project1/","items":[{"f":"import.html","u":"https://hanatrial.github.io/project1/import.html"},{"f":"index.html","u":"https://hanatrial.github.io/project1/"}]},{"name":"psr","home":"https://hanatrial.github.io/psr/","items":[{"f":"Dashboard_Pasar_Sulawesi_8.html","u":"https://hanatrial.github.io/psr/Dashboard_Pasar_Sulawesi_8.html"},{"f":"index.html","u":"https://hanatrial.github.io/psr/"},{"f":"list_sekolah.html","u":"https://hanatrial.github.io/psr/list_sekolah.html"},{"f":"report/laporan_blitz_hilo_matcha.html","u":"https://hanatrial.github.io/psr/report/laporan_blitz_hilo_matcha.html"},{"f":"status.html","u":"https://hanatrial.github.io/psr/status.html"},{"f":"test.html","u":"https://hanatrial.github.io/psr/test.html"},{"f":"tracker.html","u":"https://hanatrial.github.io/psr/tracker.html"},{"f":"tuset.html","u":"https://hanatrial.github.io/psr/tuset.html"}]},{"name":"var","home":"https://hanatrial.github.io/var/","items":[{"f":"checklist-diet/index.html","u":"https://hanatrial.github.io/var/checklist-diet/"},{"f":"export_item_fokus_tradisional_v2_10.html","u":"https://hanatrial.github.io/var/export_item_fokus_tradisional_v2_10.html"},{"f":"index.html","u":"https://hanatrial.github.io/var/"},{"f":"saham-laporan.html","u":"https://hanatrial.github.io/var/saham-laporan.html"}]},{"name":"VISIT","home":"https://hanatrial.github.io/VISIT/","items":[{"f":"dash.html","u":"https://hanatrial.github.io/VISIT/dash.html"},{"f":"dashboard-ops.html","u":"https://hanatrial.github.io/VISIT/dashboard-ops.html"},{"f":"dashboard.html","u":"https://hanatrial.github.io/VISIT/dashboard.html"},{"f":"go-ops.html","u":"https://hanatrial.github.io/VISIT/go-ops.html"},{"f":"go.html","u":"https://hanatrial.github.io/VISIT/go.html"},{"f":"index.html","u":"https://hanatrial.github.io/VISIT/"},{"f":"insight-mds.html","u":"https://hanatrial.github.io/VISIT/insight-mds.html"},{"f":"sekolah.html","u":"https://hanatrial.github.io/VISIT/sekolah.html"},{"f":"tarik.html","u":"https://hanatrial.github.io/VISIT/tarik.html"}]},{"name":"workbook","home":"https://hanatrial.github.io/workbook/","items":[{"f":"index.html","u":"https://hanatrial.github.io/workbook/"},{"f":"monitor.html","u":"https://hanatrial.github.io/workbook/monitor.html"},{"f":"ship.html","u":"https://hanatrial.github.io/workbook/ship.html"},{"f":"shipmon/index.html","u":"https://hanatrial.github.io/workbook/shipmon/"},{"f":"so/index.html","u":"https://hanatrial.github.io/workbook/so/"}]},{"name":"wowds","home":"https://hanatrial.github.io/wowds/","items":[{"f":"dashboard.html","u":"https://hanatrial.github.io/wowds/dashboard.html"},{"f":"index.html","u":"https://hanatrial.github.io/wowds/"}]}]},v=document.getElementById('v'),q=document.getElementById('q'),t=document.getElementById('t'),s=document.getElementById('s');
-const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const n=D.repos.reduce((a,r)=>a+r.items.length,0);
+const D={"updated":"2026-11-06T02:10:05.654Z","repos":[{"name":"den","home":"https://hanatrial.github.io/den/","items":[{"f":"public/index.html","u":"https://hanatrial.github.io/den/public/"}]},{"name":"dsbrdgpsbnd","home":"https://hanatrial.github.io/dsbrdgpsbnd/","items":[{"f":"dashboard_insentif_v2_15.html","u":"https://hanatrial.github.io/dsbrdgpsbnd/dashboard_insentif_v2_15.html"},{"f":"index.html","u":"https://hanatrial.github.io/dsbrdgpsbnd/"}]},{"name":"DUPLI","home":"https://hanatrial.github.io/DUPLI/","items":[{"f":"index.html","u":"https://hanatrial.github.io/DUPLI/"}]},{"name":"Gathering","home":"https://hanatrial.github.io/Gathering/","items":[{"f":"index.html","u":"https://hanatrial.github.io/Gathering/"}]},{"name":"insentif","home":"https://hanatrial.github.io/insentif/","items":[{"f":"bsp.html","u":"https://hanatrial.github.io/insentif/bsp.html"},{"f":"index.html","u":"https://hanatrial.github.io/insentif/"}]},{"name":"kdi","home":"https://hanatrial.github.io/kdi/","items":[{"f":"index.html","u":"https://hanatrial.github.io/kdi/"}]},{"name":"noo","home":"https://hanatrial.github.io/noo/","items":[{"f":"0f114d72ca/index.html","u":"https://hanatrial.github.io/noo/0f114d72ca/"},{"f":"dashboard.html","u":"https://hanatrial.github.io/noo/dashboard.html"},{"f":"index.html","u":"https://hanatrial.github.io/noo/"},{"f":"konsinyasi/index.html","u":"https://hanatrial.github.io/noo/konsinyasi/"},{"f":"stok-ancab.html","u":"https://hanatrial.github.io/noo/stok-ancab.html"},{"f":"stok-gimmick.html","u":"https://hanatrial.github.io/noo/stok-gimmick.html"},{"f":"visit-dashboard.html","u":"https://hanatrial.github.io/noo/visit-dashboard.html"},{"f":"visit-mds.html","u":"https://hanatrial.github.io/noo/visit-mds.html"},{"f":"wallpaper/index.html","u":"https://hanatrial.github.io/noo/wallpaper/"}]},{"name":"pcbkcots","home":"https://hanatrial.github.io/pcbkcots/","items":[{"f":"index.html","u":"https://hanatrial.github.io/pcbkcots/"}]},{"name":"project1","home":"https://hanatrial.github.io/project1/","items":[{"f":"import.html","u":"https://hanatrial.github.io/project1/import.html"},{"f":"index.html","u":"https://hanatrial.github.io/project1/"}]},{"name":"psr","home":"https://hanatrial.github.io/psr/","items":[{"f":"Dashboard_Pasar_Sulawesi_8.html","u":"https://hanatrial.github.io/psr/Dashboard_Pasar_Sulawesi_8.html"},{"f":"index.html","u":"https://hanatrial.github.io/psr/"},{"f":"list_sekolah.html","u":"https://hanatrial.github.io/psr/list_sekolah.html"},{"f":"report/laporan_blitz_hilo_matcha.html","u":"https://hanatrial.github.io/psr/report/laporan_blitz_hilo_matcha.html"},{"f":"status.html","u":"https://hanatrial.github.io/psr/status.html"},{"f":"test.html","u":"https://hanatrial.github.io/psr/test.html"},{"f":"tracker.html","u":"https://hanatrial.github.io/psr/tracker.html"},{"f":"tuset.html","u":"https://hanatrial.github.io/psr/tuset.html"}]},{"name":"var","home":"https://hanatrial.github.io/var/","items":[{"f":"checklist-diet/index.html","u":"https://hanatrial.github.io/var/checklist-diet/"},{"f":"export_item_fokus_tradisional_v2_10.html","u":"https://hanatrial.github.io/var/export_item_fokus_tradisional_v2_10.html"},{"f":"index.html","u":"https://hanatrial.github.io/var/"},{"f":"saham-laporan.html","u":"https://hanatrial.github.io/var/saham-laporan.html"}]},{"name":"VISIT","home":"https://hanatrial.github.io/VISIT/","items":[{"f":"dash.html","u":"https://hanatrial.github.io/VISIT/dash.html"},{"f":"dashboard-ops.html","u":"https://hanatrial.github.io/VISIT/dashboard-ops.html"},{"f":"dashboard.html","u":"https://hanatrial.github.io/VISIT/dashboard.html"},{"f":"go-ops.html","u":"https://hanatrial.github.io/VISIT/go-ops.html"},{"f":"go.html","u":"https://hanatrial.github.io/VISIT/go.html"},{"f":"index.html","u":"https://hanatrial.github.io/VISIT/"},{"f":"insight-mds.html","u":"https://hanatrial.github.io/VISIT/insight-mds.html"},{"f":"sekolah.html","u":"https://hanatrial.github.io/VISIT/sekolah.html"},{"f":"tarik.html","u":"https://hanatrial.github.io/VISIT/tarik.html"}]},{"name":"workbook","home":"https://hanatrial.github.io/workbook/","items":[{"f":"index.html","u":"https://hanatrial.github.io/workbook/"},{"f":"monitor.html","u":"https://hanatrial.github.io/workbook/monitor.html"},{"f":"ship.html","u":"https://hanatrial.github.io/workbook/ship.html"},{"f":"shipmon/index.html","u":"https://hanatrial.github.io/workbook/shipmon/"},{"f":"so/index.html","u":"https://hanatrial.github.io/workbook/so/"}]},{"name":"wowds","home":"https://hanatrial.github.io/wowds/","items":[{"f":"dashboard.html","u":"https://hanatrial.github.io/wowds/dashboard.html"},{"f":"index.html","u":"https://hanatrial.github.io/wowds/"}]}]},$=id=>document.getElementById(id),v=$('v'),q=$('q');
+const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const total=D.repos.reduce((a,r)=>a+r.items.length,0),col=i=>'c'+(i%6);
+const root=document.documentElement;
+try{const th=localStorage.getItem('p2theme');if(th)root.dataset.theme=th}catch(e){}
+function icon(){$('tg').textContent=root.dataset.theme==='light'?'🌙':'☀️'}
+$('tg').onclick=()=>{const n=root.dataset.theme==='light'?'dark':'light';root.dataset.theme=n;try{localStorage.setItem('p2theme',n)}catch(e){}icon()};icon();
+$('f').textContent='Diperbarui '+new Date(D.updated).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})+' · otomatis tiap 30 menit';
 function render(){
   const k=q.value.trim().toLowerCase(),r=decodeURIComponent(location.hash.slice(1));
-  const repo=D.repos.find(x=>x.name===r);
+  const idx=D.repos.findIndex(x=>x.name===r),repo=D.repos[idx];
   if(repo){
-    t.textContent=repo.name;s.textContent=repo.items.length+' halaman HTML';
+    $('t').textContent=repo.name;$('s').textContent=repo.items.length+' halaman HTML · klik untuk membuka';$('st').innerHTML='';
     const L=repo.items.filter(i=>i.f.toLowerCase().includes(k));
-    v.innerHTML='<button class="back" onclick="location.hash=\'\'">← Semua repo</button>'+
-      L.map(i=>`<a class="row" href="${esc(i.u)}" target="_blank" rel="noopener">${esc(i.f)}</a>`).join('')||'<p class="mu">Tidak ada yang cocok.</p>';
+    v.innerHTML='<button class="back" onclick="location.hash=\'\'">← Semua repo</button><div class="list '+col(idx)+'">'+
+      (L.map(i=>{const p=i.f.split('/'),nm=p.pop();return `<a class="row ${col(idx)}" href="${esc(i.u)}" target="_blank" rel="noopener"><div style="flex:1;min-width:0"><div class="n">${esc(nm)}</div>${p.length?`<div class="d">${esc(p.join('/'))}/</div>`:''}</div><span class="go">↗</span></a>`}).join('')||'<div class="empty">Tidak ada yang cocok.</div>')+'</div>';
   }else{
-    t.textContent='Daftar Halaman HTML';s.textContent=D.repos.length+' repo · '+n+' halaman · diperbarui '+new Date(D.updated).toLocaleString('id-ID');
-    const L=D.repos.filter(x=>!k||x.name.toLowerCase().includes(k)||x.items.some(i=>i.f.toLowerCase().includes(k)));
-    v.innerHTML='<div class="grid">'+L.map(x=>`<button class="card" onclick="location.hash='${encodeURIComponent(x.name)}'"><b>${esc(x.name)}</b><span class="mu">${x.items.length} halaman</span></button>`).join('')+'</div>';
+    $('t').textContent='Semua Repo';$('s').textContent='Klik repo untuk melihat halaman HTML di dalamnya';
+    $('st').innerHTML=`<div class="st"><b>${D.repos.length}</b><span>Repo</span></div><div class="st"><b>${total}</b><span>Halaman HTML</span></div>`;
+    const L=D.repos.map((x,i)=>[x,i]).filter(([x])=>!k||x.name.toLowerCase().includes(k)||x.items.some(i=>i.f.toLowerCase().includes(k)));
+    v.innerHTML=L.length?'<div class="grid">'+L.map(([x,i])=>`<button class="card ${col(i)}" onclick="location.hash='${encodeURIComponent(x.name)}'"><div class="ic">${esc(x.name[0].toUpperCase())}</div><b>${esc(x.name)}</b><span>${x.items.length} halaman</span></button>`).join('')+'</div>':'<div class="empty">Tidak ada yang cocok.</div>';
   }
 }
-addEventListener('hashchange',()=>{q.value='';render()});q.addEventListener('input',render);render();
+addEventListener('hashchange',()=>{q.value='';render();scrollTo(0,0)});q.addEventListener('input',render);render();
 </script></body></html>
