@@ -166,10 +166,6 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
   <div class="card"><h2>Saldo per orang<span class="kj">残高</span></h2><div id="saldo"></div>
     <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain. <b class="neg">Merah (−)</b> = lebih banyak memakai uang orang lain. Ini hanya total. Siapa membayar ke siapa mengikuti bagian <b>Hasil akhir per orang</b> di bawah.</p></div>
   <div class="card"><h2>Hasil akhir per orang<span class="kj">精算</span></h2><p class="sub" style="margin-bottom:6px">Sesuai siapa memakai uang siapa. Hanya saling dikurangkan antara dua orang yang sama, tidak dialihkan lewat orang lain.</p><div id="settle"></div></div>
-  <div class="card"><h2>Siapa pakai uang siapa<span class="kj">貸借</span></h2><p class="sub" style="margin-bottom:8px">Dari semua catatan, sebelum saling dikurangkan. Baris = yang memakai, kolom = pemilik uang.</p><div style="overflow-x:auto" id="matrix"></div></div>
-  <div class="card"><h2>Bagikan<span class="kj">共有</span></h2>
-    <div class="row"><button class="btn" id="wa">Salin ringkasan WhatsApp</button><button class="btn ghost" id="bk">Unduh cadangan</button></div>
-    <p class="sub" id="privNote" style="margin-top:10px">Data trip tersimpan online dan dipakai bersama semua peserta. Siapa pun yang membuka aplikasi ini bisa melihat dan mengubah, jadi jangan dibagikan ke orang di luar peserta.</p></div>
 </section>
 
 <!-- CATAT -->
@@ -308,19 +304,10 @@ $('settle').addEventListener('change',e=>{const c=e.target.closest('input[data-k
 function rSum(){
   const H=hitung(),L=pasangan(H.pair);
   $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama · ≈ ${fJPY(H.total)}</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
-  if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';$('matrix').innerHTML='';return}
+  if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';return}
   $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
     return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}<br><small class="sub">≈ ${fJPY(s)}</small></td></tr>`}).join('')+'</table>';
   rSettle(L);
-  const ids=S.orang.map(o=>o.id);
-  $('matrix').innerHTML='<table><tr><th>Memakai ↓ / uang milik →</th>'+ids.map(i=>`<th>${esc(nama(i))}</th>`).join('')+'</tr>'+ids.map(a=>`<tr><td><b>${esc(nama(a))}</b></td>`+ids.map(b=>`<td>${a===b?'–':(H.pair[a][b]?fIDR(H.pair[a][b]):'')}</td>`).join('')+'</tr>').join('')+'</table>';
-}
-function ringkasWA(){
-  const H=hitung(),L=pasangan(H.pair).map(x=>Object.assign({},x,{v:sisaX(x)})).filter(x=>x.v>=1);
-  let t='*KEUANGAN TRIP JEPANG*\nTotal pengeluaran bersama: '+fIDR(H.total)+' (≈ '+fJPY(H.total)+')\nKurs bawaan: 1 JPY = Rp '+S.kurs+'\n\n*Saldo*\n';
-  S.orang.forEach(o=>{const s=H.saldo[o.id];t+='• '+o.nama+': bayar '+fIDR(H.bayar[o.id])+', pakai '+fIDR(H.pakai[o.id])+' → '+(Math.abs(s)<0.5?'lunas':(s>0?'berhak terima ':'harus bayar ')+fIDR(Math.abs(s)))+'\n'});
-  t+='\n*Yang belum dibayar*\n'+(L.length?S.orang.filter(o=>L.some(x=>x.dari===o.id)).map(o=>{const m=L.filter(x=>x.dari===o.id);return '*'+o.nama+'* harus bayar '+fIDR(m.reduce((a,x)=>a+x.v,0))+'\n'+m.map(x=>'  • ke '+nama(x.ke)+': '+fIDR(x.v)+' (≈ '+fJPY(x.v)+')').join('\n')}).join('\n'):'Semua sudah seimbang ✓');
-  return t;
 }
 
 /* form */
@@ -390,8 +377,6 @@ $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('
     {$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=c.jml;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
       const rata=Object.values(c.bagi).every(v=>Math.abs(v-c.jml/pakaiSet.size)<0.01);$('mode').value=rata?'rata':'custom';rCustom();if(!rata)document.querySelectorAll('#customBox input').forEach(i=>i.value=c.bagi[i.dataset.id]);}
     tab('add')}};
-$('wa').onclick=()=>{const t=ringkasWA();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Ringkasan tersalin ✓')).catch(()=>prompt('Salin teks ini:',t))};
-$('bk').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='keuangan-jepang-'+hariIni()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 resetForm();rAll();
 /* ---------- simpan online (Firestore, proyek mds-sulawesi) ----------
    Koleksi keuangan_jepang/TRIP_ID/ orang | cat | lunas. Selalu tersambung (tanpa pilihan lokal / kode). */
@@ -448,7 +433,7 @@ function rSink(){
   const box=$('sinkBox'),stat=$('sinkStat');if(!box||!stat)return;
   stat.className='sinkstat'+(ST==='ok'?' ok':ST==='gagal'?' bad':'');
   stat.textContent=ST==='ok'?'● Online · tersinkron antar HP':ST==='konek'?'◌ Menyambung…':ST==='gagal'?'⚠ Gagal tersambung':'';
-  if(ST==='ok')box.innerHTML='<p class="sub"><b style="color:var(--plus)">Terhubung.</b> Data dan centang sudah bayar dipakai bersama semua peserta. Perubahan di HP mana pun langsung muncul di HP lain.</p>';
+  if(ST==='ok')box.innerHTML='<p class="sub"><b style="color:var(--plus)">Terhubung.</b> Data dan centang sudah bayar dipakai bersama semua peserta. Perubahan di HP mana pun langsung muncul di HP lain. Jangan dibagikan ke orang di luar peserta.</p>';
   else if(ST==='konek')box.innerHTML='<p class="sub">Menyambung…</p>';
   else box.innerHTML='<p class="sub"><b style="color:var(--minus)">Gagal tersambung'+(STMSG?' ('+esc(STMSG)+')':'')+'.</b> '+(/permission/i.test(STMSG)?'Aturan Firestore untuk koleksi <b>keuangan_jepang</b> belum dipasang.':'Cek koneksi internet lalu coba lagi.')+'</p><button class="btn ghost small" id="sinkLagi" type="button" style="margin-top:6px">Coba lagi</button>';
 }
