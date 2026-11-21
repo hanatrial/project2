@@ -41,7 +41,7 @@ main{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:14px 14px
 
 /* ---- tab ---- */
 .tabs{display:flex;gap:6px;margin:-4px 0 14px;overflow-x:auto;scrollbar-width:none}
-.tabs button{flex:1 0 auto;font:inherit;font-weight:700;font-size:12.5px;padding:7px 14px 8px;border-radius:12px 12px 4px 4px;border:1px solid var(--line);border-bottom:3px solid transparent;background:var(--card);color:var(--mute);cursor:pointer;white-space:nowrap;line-height:1.25}
+.tabs button{flex:1 1 0;min-width:62px;font:inherit;font-weight:700;font-size:11.5px;padding:7px 6px 8px;white-space:normal;border-radius:12px 12px 4px 4px;border:1px solid var(--line);border-bottom:3px solid transparent;background:var(--card);color:var(--mute);cursor:pointer;line-height:1.25}
 .tabs button .kj{display:block;font-family:'Shippori Mincho',serif;font-size:15px;font-weight:800;color:var(--ai)}
 .tabs button.on{color:var(--sumi);border-bottom-color:var(--shu);background:var(--in);box-shadow:0 3px 10px rgba(34,58,94,.12)}
 .tabs button.on .kj{color:var(--shu)}
@@ -117,6 +117,9 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .note{font-size:12px;color:var(--mute);line-height:1.55;border-left:3px solid var(--shu);padding:8px 12px;background:rgba(210,69,58,.06);border-radius:0 6px 6px 0;margin-bottom:12px}
 .empty{text-align:center;color:var(--mute);padding:24px 0;font-size:13px}
 .empty::before{content:'🗻';display:block;font-size:30px;margin-bottom:4px;opacity:.75}
+.man ol,.man ul{padding-left:20px;font-size:13.5px;line-height:1.7;margin:4px 0 2px}
+.man li{margin:3px 0}.man .eg{font-size:13px;line-height:1.65;background:rgba(210,69,58,.07);border-left:3px solid var(--shu);border-radius:0 6px 6px 0;padding:9px 12px;margin:8px 0 2px}
+.man h3{font-size:13px;font-weight:800;color:var(--ai);margin:12px 0 2px}
 .hide{display:none}
 .linkbox{display:flex;gap:6px;margin-top:8px}.linkbox input{font-size:12px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ai);color:#fff;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;border-left:4px solid var(--shu)}
@@ -157,7 +160,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <main>
 <div id="sinkStat" class="sinkstat"></div>
 <div class="tabs" id="tabs">
-  <button data-t="sum" class="on"><span class="kj">集計</span>Ringkasan</button><button data-t="add"><span class="kj">記録</span>Catat</button><button data-t="his"><span class="kj">履歴</span>Riwayat</button><button data-t="set"><span class="kj">設定</span>Peserta &amp; Kurs</button>
+  <button data-t="sum" class="on"><span class="kj">集計</span>Ringkasan</button><button data-t="add"><span class="kj">記録</span>Catat</button><button data-t="his"><span class="kj">履歴</span>Riwayat</button><button data-t="set"><span class="kj">設定</span>Peserta &amp; Kurs</button><button data-t="man"><span class="kj">説明</span>Manual</button>
 </div>
 
 <!-- RINGKASAN -->
@@ -206,6 +209,53 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
   <div class="card"><h2>Sinkron<span class="kj">同期</span></h2><div id="sinkBox"></div></div>
   <div class="card"><h2>Kurs bawaan<span class="kj">為替</span></h2><label>1 JPY = … Rp</label><input id="kursDef" inputmode="decimal">
     <p class="sub" style="margin-top:6px">Dipakai sebagai isian awal saat mencatat dalam yen. Tiap catatan menyimpan kursnya sendiri, jadi mengubah kurs ini tidak mengubah catatan lama.</p></div>
+</section>
+
+<!-- MANUAL -->
+<section id="v-man" class="hide man">
+  <div class="card"><h2>Apa ini?<span class="kj">概要</span></h2>
+    <p class="sub" style="font-size:13.5px;line-height:1.7">Catatan patungan <b>trip Jepang</b> untuk 14 peserta: siapa membayar apa, siapa ikut memakai, dan siapa harus membayar ke siapa. Datanya tersimpan online dan sama di semua HP, jadi cukup satu orang yang mencatat dan semua bisa melihat.</p></div>
+
+  <div class="card"><h2>Isi tiap tab<span class="kj">各タブ</span></h2>
+    <ol>
+      <li><b>Ringkasan</b>: total pengeluaran, <b>saldo per orang</b> (hijau = uangnya masih dipakai orang lain, merah = lebih banyak memakai uang orang lain), dan <b>hasil akhir per orang</b>.</li>
+      <li><b>Catat</b>: tambah pengeluaran bersama.</li>
+      <li><b>Riwayat</b>: semua catatan. Bisa <b>Ubah</b> atau <b>Hapus</b>, dan bisa disaring per orang.</li>
+      <li><b>Peserta &amp; Kurs</b>: daftar 14 peserta (tetap) dan kurs bawaan 1 yen = berapa rupiah.</li>
+    </ol></div>
+
+  <div class="card"><h2>Cara mencatat<span class="kj">記録</span></h2>
+    <ol>
+      <li>Buka tab <b>Catat</b>, isi <b>keterangan</b> dan <b>jumlah</b> (pilih ¥ atau Rp).</li>
+      <li>Pilih <b>Dibayar oleh</b>: orang yang mengeluarkan uang.</li>
+      <li>Pilih <b>Dipakai untuk siapa</b>: ketuk nama yang ikut. <b>✓ berwarna</b> = ikut ditagih, <b>kosong bergaris</b> = tidak ikut. Ada tombol Pilih semua dan Kosongkan.</li>
+      <li><b>Pembagian</b>: <b>Rata</b> (dibagi sama) atau <b>Nominal per orang</b> (isi sendiri, totalnya harus sama dengan jumlah).</li>
+      <li>Ketuk <b>Simpan</b>. Salah isi? Perbaiki lewat tab Riwayat.</li>
+    </ol>
+    <div class="eg"><b>Contoh:</b> L bayar ramen ¥3.000 untuk Imad dan Bunda, dibagi rata. Maka Imad ¥1.500 dan Bunda ¥1.500, masing-masing berutang ke L. Bagian L sendiri tidak dihitung.</div></div>
+
+  <div class="card"><h2>Hasil akhir per orang<span class="kj">精算</span></h2>
+    <ul>
+      <li>Tiap orang punya kartu. <b>Ketuk nama</b> untuk membuka: <b>Bayar ke siapa</b> dan <b>Terima dari siapa</b>, lengkap dengan jumlahnya.</li>
+      <li>Kalau <b>sudah bayar</b> (atau sudah menerima), <b>centang kotaknya</b>. Barisnya dicoret dan jadi “lunas ✓”. Centang terlihat oleh semua peserta.</li>
+      <li>Utang <b>hanya saling dikurangkan antara dua orang yang sama</b>. Tidak dialihkan lewat orang lain, jadi hasilnya sesuai siapa memakai uang siapa.</li>
+      <li>Kalau setelah dicentang ada pengeluaran baru yang menambah utang, sisanya muncul lagi.</li>
+    </ul></div>
+
+  <div class="card"><h2>Yen dan kurs<span class="kj">為替</span></h2>
+    <ul>
+      <li>Catatan dalam yen otomatis dihitung ke rupiah dengan kurs saat dicatat. Kurs bawaan diatur di tab Peserta &amp; Kurs.</li>
+      <li>Mengubah kurs bawaan <b>tidak mengubah catatan lama</b>. Tiap catatan menyimpan kursnya sendiri.</li>
+      <li>Angka “≈ ¥” di bawah rupiah hanya perkiraan dengan kurs bawaan.</li>
+    </ul></div>
+
+  <div class="card"><h2>Catatan penting<span class="kj">注意</span></h2>
+    <ul>
+      <li>Aplikasi ini <b>wajib dipasang</b> dulu lewat menu browser (Instal aplikasi / Tambahkan ke layar utama), lalu dibuka dari ikon di layar utama.</li>
+      <li>Data dipakai bersama semua peserta, jadi <b>perubahan oleh siapa pun langsung terlihat</b>. Cek dulu sebelum menghapus catatan.</li>
+      <li>Status di atas tab: <b>● Online</b> = tersinkron. Kalau <b>Gagal tersambung</b>, cek internet lalu buka ulang aplikasi.</li>
+      <li>Jangan bagikan aplikasi ini ke orang di luar peserta.</li>
+    </ul></div>
 </section>
 </main>
 <div class="foot" aria-hidden="true">旅 · 楽しんでね 🌸</div>
@@ -361,7 +411,7 @@ function rOrang(){
   $('kursDef').value=S.kurs;
 }
 function rAll(){rOrang();rForm();rSum();rHist()}
-function tab(t){['sum','add','his','set'].forEach(k=>$('v-'+k).classList.toggle('hide',k!==t));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='his')rHist();window.scrollTo(0,0)}
+function tab(t){['sum','add','his','set','man'].forEach(k=>$('v-'+k).classList.toggle('hide',k!==t));document.querySelectorAll('#tabs button').forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);if(on&&b.scrollIntoView)b.scrollIntoView({inline:'center',block:'nearest'})});if(t==='his')rHist();window.scrollTo(0,0)}
 
 /* peristiwa */
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
