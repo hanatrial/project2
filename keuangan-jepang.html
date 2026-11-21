@@ -61,6 +61,7 @@ input:focus,select:focus{border-color:var(--ai);box-shadow:0 0 0 3px rgba(34,58,
 .btn.full{width:100%;margin-top:13px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .chip{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--in);color:var(--mute);cursor:pointer}
+.chip:not(.on){border-style:dashed;opacity:.85}
 .chip.on{background:var(--ai);color:#fff;border-color:var(--ai)}
 @media(prefers-color-scheme:dark){.chip.on{background:var(--shu);border-color:var(--shu)}}
 .person{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-weight:700}
@@ -138,7 +139,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <section id="v-add" class="hide">
   <div class="card">
     <h2><span id="addTitle">Catat baru</span><span class="kj">記録</span></h2>
-    <div class="chips" id="jenis"><button class="chip on" data-j="x">Pengeluaran bersama</button><button class="chip" data-j="t">Transfer / pinjam</button></div>
+    <div class="chips" id="jenis"><button class="chip on" data-j="x">Pengeluaran bersama</button><button class="chip" data-j="t">Transfer / pinjam</button><button class="chip" data-j="p">Tempel dari WhatsApp</button></div>
 
     <div id="fx">
       <label>Keterangan</label><input id="ket" placeholder="mis. Ramen Ichiran, tiket Shinkansen">
@@ -146,8 +147,8 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
       <div class="row"><div><label>Jumlah</label><input id="jml" inputmode="decimal" placeholder="0"></div><div><label>Mata uang</label><select id="mu"><option value="JPY">JPY (¥)</option><option value="IDR">IDR (Rp)</option></select></div></div>
       <div id="kursRow"><label>Kurs: 1 JPY = … Rp (untuk catatan ini)</label><input id="kurs" inputmode="decimal"></div>
       <label>Dibayar oleh (pakai uang siapa)</label><select id="byr"></select>
-      <label>Dipakai untuk siapa</label><div class="chips" id="pakai"></div>
-      <div style="margin-top:6px"><button class="btn ghost small" id="semua" type="button">Pilih semua</button></div>
+      <label>Dipakai untuk siapa</label><p class="sub" style="margin:0 0 4px"><b style="color:var(--shu)">✓ berwarna</b> = ikut memakai (ikut ditagih). <b>Kosong bergaris</b> = tidak ikut. Ketuk nama untuk memilih atau membatalkan.</p><div class="chips" id="pakai"></div>
+      <div style="margin-top:6px;display:flex;gap:6px"><button class="btn ghost small" id="semua" type="button">Pilih semua</button><button class="btn ghost small" id="kosong" type="button">Kosongkan</button></div>
       <label>Pembagian</label><select id="mode"><option value="rata">Rata</option><option value="custom">Nominal per orang</option></select>
       <div id="customBox" class="hide"></div>
     </div>
@@ -161,6 +162,15 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
       <label>Tanggal</label><input type="date" id="ttgl">
     </div>
 
+    <div id="fp" class="hide">
+      <p class="note">Tempel pesan titip beli yen (baris seperti <b>1. Imad: ¥10.000 = Rp1.160.000</b>). Orang yang membayar dianggap meminjamkan yen ke yang lain, jadi tiap orang berutang ke dia sebesar pesanannya.</p>
+      <label>Teks pesan</label><textarea id="ptxt" rows="8" placeholder="Titip beli Yen (kurs Rp116/yen):&#10;1. Imad: ¥10.000 = Rp1.160.000"></textarea>
+      <div class="row"><div><label>Yang membayar</label><select id="pbyr"></select></div><div><label>Kurs: 1 JPY = … Rp</label><input id="pkurs" inputmode="decimal"></div></div>
+      <label>Tanggal</label><input type="date" id="ptgl">
+      <button class="btn ghost full" id="pbaca" type="button">Baca teks</button>
+      <div id="ppre" style="margin-top:10px"></div>
+      <button class="btn red full hide" id="psimpan" type="button">Simpan semua</button>
+    </div>
     <div class="warn" id="err"></div>
     <button class="btn red full" id="simpan">Simpan 保存</button>
     <button class="btn ghost full hide" id="batal">Batal edit</button>
@@ -252,7 +262,7 @@ function rForm(){
   const has=v=>S.orang.some(o=>String(o.id)===String(v));
   const kb=$('byr').value,kd=$('tdari').value,kk=$('tke').value;   // pertahankan pilihan saat form digambar ulang (mis. setelah ganti mata uang)
   opsOrang($('byr'),has(kb)?kb:(S.orang[0]&&S.orang[0].id));opsOrang($('tdari'),has(kd)?kd:(S.orang[0]&&S.orang[0].id));opsOrang($('tke'),has(kk)?kk:(S.orang[1]?S.orang[1].id:undefined));
-  $('pakai').innerHTML=S.orang.map(o=>`<button type="button" class="chip${pakaiSet.has(o.id)?' on':''}" data-id="${o.id}">${esc(o.nama)}</button>`).join('')||'<span class="sub">Belum ada peserta.</span>';
+  $('pakai').innerHTML=S.orang.map(o=>`<button type="button" class="chip${pakaiSet.has(o.id)?' on':''}" data-id="${o.id}" aria-pressed="${pakaiSet.has(o.id)}">${pakaiSet.has(o.id)?'✓ ':''}${esc(o.nama)}</button>`).join('')||'<span class="sub">Belum ada peserta.</span>';
   rCustom();
   $('kursRow').classList.toggle('hide',$('mu').value!=='JPY');$('tkursRow').classList.toggle('hide',$('tmu').value!=='JPY');
 }
@@ -261,7 +271,7 @@ function rCustom(){
   const keep={};document.querySelectorAll('#customBox input').forEach(i=>keep[i.dataset.id]=i.value);
   $('customBox').innerHTML=[...pakaiSet].map(id=>`<label>${esc(nama(id))}</label><input inputmode="decimal" data-id="${id}" value="${keep[id]||''}" placeholder="nominal dalam mata uang di atas">`).join('')||'<p class="sub">Pilih dulu siapa yang memakai.</p>';
 }
-function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('ft').classList.toggle('hide',j!=='t')}
+function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('ft').classList.toggle('hide',j!=='t');$('fp').classList.toggle('hide',j!=='p');$('simpan').classList.toggle('hide',j==='p');if(j==='p'&&!$('ptgl').value)$('ptgl').value=hariIni()}
 function resetForm(){editId=null;['ket','jml','tket','tjml'].forEach(i=>$(i).value='');$('tgl').value=$('ttgl').value=hariIni();$('kurs').value=$('tkurs').value=S.kurs;$('mu').value=$('tmu').value='JPY';$('mode').value='rata';
   pakaiSet=new Set(S.orang.map(o=>o.id));$('addTitle').textContent='Catat baru';$('batal').classList.add('hide');$('err').textContent='';setJenis('x');rForm()}
 function simpan(){
@@ -308,7 +318,7 @@ function tab(t){['sum','add','his','set'].forEach(k=>$('v-'+k).classList.toggle(
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
 $('jenis').onclick=e=>{const b=e.target.closest('.chip');if(b)setJenis(b.dataset.j)};
 $('pakai').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const id=+b.dataset.id;pakaiSet.has(id)?pakaiSet.delete(id):pakaiSet.add(id);rForm()};
-$('semua').onclick=()=>{pakaiSet=new Set(S.orang.map(o=>o.id));rForm()};
+$('semua').onclick=()=>{pakaiSet=new Set(S.orang.map(o=>o.id));rForm()};$('kosong').onclick=()=>{pakaiSet=new Set();rForm()};
 $('mode').onchange=rCustom;$('mu').onchange=$('tmu').onchange=rForm;
 $('simpan').onclick=simpan;$('batal').onclick=()=>{resetForm();tab('his')};
 $('fOrang').onchange=rHist;
@@ -329,5 +339,53 @@ $('wa').onclick=()=>{const t=ringkasWA();(navigator.clipboard?navigator.clipboar
 $('bk').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='keuangan-jepang-'+hariIni()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 $('rs').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.orang)||!Array.isArray(x.cat))throw 0;if(confirm('Ganti semua data di HP ini dengan isi cadangan?')){S=Object.assign({orang:[],cat:[],kurs:110,nid:1},x);simpanS();resetForm();rAll();toast('Cadangan dipulihkan ✓')}}catch(_){toast('File cadangan tidak valid')}e.target.value=''};r.readAsText(f)};
 $('reset').onclick=()=>{if(confirm('Hapus SEMUA peserta dan catatan di HP ini? Tidak bisa dibatalkan.')){S={orang:[],cat:[],kurs:S.kurs,nid:1};simpanS();resetForm();rAll()}};
+/* ---------- tempel pesan titip beli yen ---------- */
+const HON=/^(ce|ko|kak|kk|mas|mba|mbak|pak|bu|ibu|bang|om|tante)\s+/i;
+const bersih=n=>{n=n.trim().replace(/\s+/g,' ');const m=n.replace(HON,'').trim();return m||n};
+function parseTempel(txt){
+  const km=/kurs[^0-9]{0,14}([\d.,]+)\s*\/\s*(?:yen|¥)/i.exec(txt),kurs=km?num(km[1]):NaN,rows=[];
+  txt.split(/\r?\n/).forEach(l=>{const m=/^\s*(?:\d+\s*[.)]\s*)?([^:=\n¥]+?)\s*[:=]\s*[¥￥]\s*([\d.,]+)/.exec(l);if(m){const y=num(m[2]);if(y>0)rows.push({nama:bersih(m[1]),yen:y})}});
+  return{kurs,rows};
+}
+let TP=null,TPbayar='';
+function tpBaca(){
+  const t=parseTempel($('ptxt').value);
+  if(!t.rows.length){$('ppre').innerHTML='';$('psimpan').classList.add('hide');TP=null;$('err').textContent='Tidak ada baris yang terbaca. Format: "1. Nama: ¥10.000".';return}
+  $('err').textContent='';
+  if(t.kurs>0)$('pkurs').value=t.kurs;else if(!($('pkurs').value>0))$('pkurs').value=S.kurs;
+  const names=[...new Set(S.orang.map(o=>o.nama).concat(t.rows.map(r=>r.nama)))];
+  const cur=$('pbyr').value||TPbayar;
+  $('pbyr').innerHTML='<option value="">Pilih yang membayar</option>'+names.map(n=>`<option>${esc(n)}</option>`).join('');
+  const hit=names.find(n=>n.toLowerCase()===String(cur).toLowerCase());if(hit)$('pbyr').value=hit;
+  TP=t;tpPre();
+}
+function tpPre(){
+  if(!TP)return;const byr=$('pbyr').value,kurs=num($('pkurs').value)||S.kurs;
+  const rows=TP.rows.filter(r=>r.nama.toLowerCase()!==byr.toLowerCase());
+  const yen=rows.reduce((a,r)=>a+r.yen,0);
+  $('ppre').innerHTML=`<table><tr><th>Berutang ke ${esc(byr||'…')}</th><th>Yen</th><th>Rupiah</th></tr>`+rows.map(r=>`<tr><td>${esc(r.nama)}</td><td>¥${Math.round(r.yen).toLocaleString('en-US')}</td><td>${fIDR(r.yen*kurs)}</td></tr>`).join('')+`<tr><td><b>Total ${rows.length} orang</b></td><td><b>¥${Math.round(yen).toLocaleString('en-US')}</b></td><td><b>${fIDR(yen*kurs)}</b></td></tr></table>`+
+    (byr&&TP.rows.some(r=>r.nama.toLowerCase()===byr.toLowerCase())?`<p class="sub" style="margin-top:6px">Bagian ${esc(byr)} sendiri tidak dihitung sebagai utang.</p>`:'');
+  $('psimpan').classList.toggle('hide',!byr||!rows.length);
+}
+function tpSimpan(){
+  const byr=$('pbyr').value,kurs=num($('pkurs').value);
+  if(!TP||!byr)return;if(!(kurs>0)){$('err').textContent='Isi kurs.';return}
+  const idOf=n=>{let o=S.orang.find(x=>x.nama.toLowerCase()===n.toLowerCase());if(!o){o={id:S.nid++,nama:n};S.orang.push(o)}return o.id};
+  const dari=idOf(byr),tgl=$('ptgl').value||hariIni();let baru=0,lewat=0;
+  TP.rows.filter(r=>r.nama.toLowerCase()!==byr.toLowerCase()).forEach(r=>{
+    const ke=idOf(r.nama);
+    if(S.cat.some(c=>c.t==='t'&&c.dari===dari&&c.ke===ke&&c.jml===r.yen&&c.mu==='JPY'&&c.kurs===kurs&&c.tgl===tgl&&c.ket==='Titip beli yen')){lewat++;return}
+    S.cat.push({id:S.nid++,t:'t',tgl,ket:'Titip beli yen',jml:r.yen,mu:'JPY',kurs,dari,ke});baru++});
+  S.kurs=kurs;   // kurs di pesan jadi kurs bawaan, supaya perkiraan ¥ di hasil akhir cocok
+  simpanS();toast(baru+' catatan tersimpan'+(lewat?' · '+lewat+' sudah ada, dilewati':'')+' ✓');
+  $('ptxt').value='';TP=null;$('ppre').innerHTML='';$('psimpan').classList.add('hide');resetForm();rAll();tab('sum');
+}
+$('pbaca').onclick=tpBaca;$('ptxt').oninput=()=>{TP=null;$('psimpan').classList.add('hide')};$('pbyr').onchange=tpPre;$('pkurs').oninput=tpPre;$('psimpan').onclick=tpSimpan;
 resetForm();rAll();
+// link dengan data tertanam di bagian #, hanya dibaca di HP ini (tidak dikirim ke server), lalu dihapus dari alamat
+(function(){const m=/^#tempel=([\w-]+)/.exec(location.hash);if(!m)return;
+  try{const b=atob(m[1].replace(/-/g,'+').replace(/_/g,'/')),u=Uint8Array.from(b,c=>c.charCodeAt(0)),o=JSON.parse(new TextDecoder().decode(u));
+    history.replaceState(null,'',location.pathname+location.search);
+    resetForm();tab('add');setJenis('p');$('ptxt').value=o.t||'';TPbayar=o.b||'';if(o.k>0)$('pkurs').value=o.k;tpBaca();
+  }catch(e){}})();
 </script></body></html>
