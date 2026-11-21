@@ -125,7 +125,9 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .hide{display:none}
 #peta{height:320px;border-radius:8px;border:1px solid var(--line);overflow:hidden;z-index:1}
 .pin{background:none;border:0}.pin span{display:inline-block;transform:translate(-50%,-100%);background:var(--ai);color:#fff;border-radius:999px;padding:2px 9px;font:800 11px/1.5 'Zen Maru Gothic',sans-serif;white-space:nowrap;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
-.pin.me span{background:var(--shu)}.pin.lama span{background:#8a8f9c}
+.pin.me span{background:var(--shu)}.pin.lama span{background:#8a8f9c}.pin.sel span{background:#E2A21F;color:#1d2433;box-shadow:0 0 0 4px rgba(226,162,31,.45),0 2px 6px rgba(0,0,0,.35)}
+.grp[data-g],.lokrow[data-g]{cursor:pointer}.grp[data-g]:active,.lokrow[data-g]:active{opacity:.7}
+.tapinfo{font-size:11.5px;color:var(--mute);margin:0 0 8px}
 .lokrow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}.lokrow:last-child{border-bottom:0}
 .lokrow small{display:block;color:var(--mute);font-size:11px}
 .grp{background:var(--in);border:1px solid var(--line);border-left:4px solid var(--matcha);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:13.5px;line-height:1.5}
@@ -235,7 +237,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
   <div class="card"><h2>Peta<span class="kj">地図</span></h2>
     <div id="peta"></div><div id="petaInfo" class="sub" style="margin-top:6px"></div>
     <button class="btn ghost small" id="petaPusat" type="button" style="margin-top:8px">Pusatkan ke semua orang</button></div>
-  <div class="card"><h2>Siapa sama siapa<span class="kj">一緒</span></h2><div id="grup"></div></div>
+  <div class="card"><h2>Siapa sama siapa<span class="kj">一緒</span></h2><p class="tapinfo">Ketuk satu kelompok atau nama, peta langsung pindah ke sana.</p><div id="grup"></div></div>
 </section>
 
 <!-- MANUAL -->
@@ -531,7 +533,7 @@ function rSink(){
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(t&&t.id==='sinkLagi')startSync()});
 /* ---------- lokasi realtime (hanya saat aplikasi terbuka) ---------- */
 let SAYA=0;try{SAYA=+localStorage.getItem('kj-saya')||0}catch(e){}
-let LOK={},LOKON=false,WATCH=null,POS=null,LAST=null,LOKT=null,WL=null,MAP=null,MARK={},LOKERR='',FITTED=false;
+let LOK={},LOKON=false,WATCH=null,POS=null,LAST=null,LOKT=null,WL=null,MAP=null,MARK={},LOKERR='',FITTED=false,SEL=new Set();
 const LAMA_MS=15*60*1000;   // lebih dari 15 menit = dianggap lama (abu-abu)
 const jarak=(a,b)=>{const R0=6371000,t=Math.PI/180,dl=(b.lat-a.lat)*t,dn=(b.lon-a.lon)*t,x=Math.sin(dl/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dn/2)**2;return 2*R0*Math.asin(Math.sqrt(x))};
 const lalu=ts=>{const d=Math.max(0,Math.round((Date.now()-ts)/1000));return d<20?'baru saja':d<90?d+' dtk lalu':d<5400?Math.round(d/60)+' menit lalu':Math.round(d/3600)+' jam lalu'};
@@ -581,9 +583,9 @@ function rLok(buka){
   const segar=ada.filter(x=>now-x.ts<=LAMA_MS);
   // daftar & kelompok
   const gr=kelompok(segar).sort((a,b)=>b.length-a.length);
-  $('grup').innerHTML=ada.length?(gr.filter(g=>g.length>1).map(g=>{let m=0;for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++)m=Math.max(m,jarak(g[i],g[j]));return `<div class="grp">👥 <b>${g.map(x=>esc(x.nama)).join(', ')}</b><small>bersama, saling berjarak maksimal ${fM(m)}</small></div>`}).join('')+
-    (gr.filter(g=>g.length===1).length?'<div class="grp" style="border-left-color:var(--line)">🚶 <b>Sendiri:</b> '+gr.filter(g=>g.length===1).map(g=>esc(g[0].nama)).join(', ')+'</div>':'')+
-    ada.map(x=>{const lm=now-x.ts>LAMA_MS;return `<div class="lokrow"><span>${esc(x.nama)}${x.id===SAYA?' (kamu)':''}<small>${lm?'terakhir terlihat ':''}${lalu(x.ts)} · ±${x.acc||0} m</small></span><span>${lm?'<span class="sub">abu-abu di peta</span>':''}</span></div>`}).join('')):'<div class="empty">Belum ada yang membagikan lokasi.</div>';
+  $('grup').innerHTML=ada.length?(gr.filter(g=>g.length>1).map(g=>{let m=0;for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++)m=Math.max(m,jarak(g[i],g[j]));return `<div class="grp" data-g="${g.map(x=>x.id).join(',')}">👥 <b>${g.map(x=>esc(x.nama)).join(', ')}</b><small>bersama, saling berjarak maksimal ${fM(m)} · ketuk untuk lihat di peta</small></div>`}).join('')+
+    (gr.filter(g=>g.length===1).length?gr.filter(g=>g.length===1).map(g=>'<div class="grp" data-g="'+g[0].id+'" style="border-left-color:var(--line)">🚶 <b>'+esc(g[0].nama)+'</b> sendiri<small>ketuk untuk lihat di peta</small></div>').join(''):'')+
+    ada.map(x=>{const lm=now-x.ts>LAMA_MS;return `<div class="lokrow" data-g="${x.id}"><span>${esc(x.nama)}${x.id===SAYA?' (kamu)':''}<small>${lm?'terakhir terlihat ':''}${lalu(x.ts)} · ±${x.acc||0} m</small></span><span>${lm?'<span class="sub">abu-abu di peta</span>':''}</span></div>`}).join('')):'<div class="empty">Belum ada yang membagikan lokasi.</div>';
   $('petaInfo').textContent=ada.length?ada.length+' orang di peta'+(ada.length!==segar.length?' ('+(ada.length-segar.length)+' lokasinya sudah lama)':''):'Peta akan terisi kalau ada yang menyalakan lokasi.';
   gambarPeta(ada,buka===true);
 }
@@ -594,14 +596,23 @@ function gambarPeta(ada,fit){
   if(ada.length&&!FITTED){fit=true;FITTED=true}
   const now=Date.now(),ids=new Set(ada.map(x=>String(x.id)));
   Object.keys(MARK).forEach(k=>{if(!ids.has(k)){MAP.removeLayer(MARK[k]);delete MARK[k]}});
-  ada.forEach(x=>{const k=String(x.id),cls='pin'+(x.id===SAYA?' me':'')+((now-x.ts>LAMA_MS)?' lama':''),ic=L.divIcon({className:cls,html:'<span>'+esc(x.nama)+'</span>',iconSize:[0,0]});
+  ada.forEach(x=>{const k=String(x.id),cls='pin'+(x.id===SAYA?' me':'')+((now-x.ts>LAMA_MS)?' lama':'')+(SEL.has(x.id)?' sel':''),ic=L.divIcon({className:cls,html:'<span>'+esc(x.nama)+'</span>',iconSize:[0,0]});
     if(MARK[k]){MARK[k].setLatLng([x.lat,x.lon]);MARK[k].setIcon(ic)}else MARK[k]=L.marker([x.lat,x.lon],{icon:ic}).addTo(MAP)});
   if(fit&&ada.length){const b=L.latLngBounds(ada.map(x=>[x.lat,x.lon]));ada.length===1?MAP.setView(b.getCenter(),16):MAP.fitBounds(b,{padding:[40,40],maxZoom:17})}
 }
+function fokusPeta(ids){
+  const ada=ids.map(i=>LOK[String(i)]).filter(x=>x&&x.lat!=null);
+  if(!ada.length)return;
+  SEL=new Set(ada.map(x=>x.id));gambarPeta(Object.values(LOK).filter(x=>x&&x.lat!=null),false);
+  if(MAP){const b=L.latLngBounds(ada.map(x=>[x.lat,x.lon]));ada.length===1?MAP.setView(b.getCenter(),17,{animate:true}):MAP.fitBounds(b,{padding:[60,60],maxZoom:18,animate:true})}
+  const pt=$('peta');if(pt&&pt.scrollIntoView)pt.scrollIntoView({behavior:'smooth',block:'center'});
+  clearTimeout(fokusPeta._t);fokusPeta._t=setTimeout(()=>{SEL=new Set();rLok()},5000);
+}
 document.addEventListener('click',e=>{
+  const gk=e.target.closest('#grup [data-g]');if(gk){fokusPeta(gk.dataset.g.split(',').map(Number));return}
   const c=e.target.closest('#sayaChips .chip');if(c){setSaya(+c.dataset.id);return}
   if(e.target.closest('#lokToggle')){LOKON?stopLokasi():startLokasi();return}
-  if(e.target.closest('#petaPusat')){rLok(true)}
+  if(e.target.closest('#petaPusat')){SEL=new Set();rLok(true)}
 });
 setInterval(()=>{if(!$('v-lok').classList.contains('hide'))rLok()},20000);   // segarkan "x menit lalu"
 rSink();
