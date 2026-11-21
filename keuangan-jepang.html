@@ -233,11 +233,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
   <div class="card"><h2>Bagikan lokasiku<span class="kj">共有</span></h2>
     <div id="lokStatus" class="sub" style="margin-bottom:8px"></div>
     <button class="btn red full" id="lokToggle" type="button" style="margin-top:0">Nyalakan lokasi</button>
-    <p class="sub" style="margin-top:10px">Posisi dikirim tiap beberapa detik. Di <b>aplikasi Android (APK)</b>, posisi tetap dikirim di latar belakang walau layar terkunci. Di versi web/PWA, posisi hanya terkirim <b>selama aplikasi terbuka di layar</b> (layar dijaga menyala, lebih boros baterai). Semua peserta bisa melihat posisimu. Matikan kapan saja.</p></div>
-  <div class="card" id="apkCard"><h2>Android: lokasi di latar belakang<span class="kj">安</span></h2>
-    <p class="sub">Supaya lokasi tetap jalan walau layar terkunci, pasang <b>aplikasi Android</b> (bukan PWA). Hanya Android. Unduh, buka file-nya, izinkan <b>pasang dari sumber tidak dikenal</b>, lalu buka aplikasi <b>Trip Jepang</b> dan nyalakan lokasi di tab ini.</p>
-    <a class="btn red full" style="display:block;text-align:center;text-decoration:none" href="https://github.com/hanatrial/project2/releases/download/apk/trip-jepang.apk">⬇ Unduh APK Android</a>
-    <p class="sub" style="margin-top:8px">Di HP Xiaomi, Oppo, Vivo, dan sejenisnya, izinkan aplikasi ini berjalan di latar belakang dan matikan hemat baterai untuknya, supaya tidak dimatikan sistem.</p></div>
+    <p class="sub" style="margin-top:10px">Posisi dikirim tiap beberapa detik. Posisi hanya terkirim <b>selama aplikasi terbuka di layar</b> (layar dijaga menyala, lebih boros baterai). Semua peserta bisa melihat posisimu. Matikan kapan saja.</p></div>
   <div class="card"><h2>Peta<span class="kj">地図</span></h2>
     <div id="peta"></div><div id="petaInfo" class="sub" style="margin-top:6px"></div>
     <button class="btn ghost small" id="petaPusat" type="button" style="margin-top:8px">Pusatkan ke semua orang</button></div>
@@ -279,7 +275,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
     <ul>
       <li>Di tab <b>Lokasi</b>, pilih <b>namamu</b>, lalu ketuk <b>Nyalakan lokasi</b> dan izinkan lokasi saat diminta.</li>
       <li>Peta menampilkan posisi semua yang sedang berbagi, dan <b>Siapa sama siapa</b> mengelompokkan yang berdekatan (kurang dari sekitar 100 m).</li>
-      <li>Di <b>aplikasi Android (APK)</b>, posisi tetap terkirim di latar belakang walau layar terkunci (ada notifikasi “Lokasi trip aktif”). Di PWA/web, posisi hanya terkirim <b>saat aplikasi terbuka di layar</b>. Kalau berhenti, posisi tampil abu-abu dengan waktu terakhirnya.</li>
+      <li>Posisi hanya terkirim <b>saat aplikasi terbuka di layar</b>. Kalau berhenti, posisi tampil abu-abu dengan waktu terakhirnya.</li>
       <li>Matikan dengan tombol yang sama. Posisimu langsung hilang dari peta.</li>
     </ul></div>
 
@@ -307,8 +303,7 @@ const KEY='keuangan-jepang-v1',$=id=>document.getElementById(id);
 const UA=navigator.userAgent||'';
 const IS_PHONE=/android|iphone|ipad|ipod|mobile/i.test(UA)||(navigator.maxTouchPoints>1&&/Macintosh/.test(UA));   // termasuk iPad
 const IS_IOS=/iphone|ipad|ipod/i.test(UA)||(navigator.maxTouchPoints>1&&/Macintosh/.test(UA));
-const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());   // aplikasi Android (APK) pembungkus
-const STANDALONE=NATIVE||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(m=>{try{return matchMedia('(display-mode: '+m+')').matches}catch(e){return false}})||navigator.standalone===true;
+const STANDALONE=['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(m=>{try{return matchMedia('(display-mode: '+m+')').matches}catch(e){return false}})||navigator.standalone===true;
 const GATED=IS_PHONE&&!STANDALONE;
 let deferredInstall=null;
 function gateRender(){
@@ -553,15 +548,9 @@ function tulisPos(force){
   c.doc(String(SAYA)).set({id:SAYA,nama:nama(SAYA),lat:POS.lat,lon:POS.lon,acc:Math.round(POS.acc||0),ts:now}).catch(()=>{});
 }
 async function layarNyala(){try{if(navigator.wakeLock&&!WL){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>{WL=null})}}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&LOKON&&!NATIVE){layarNyala();tulisPos(true)}});
-try{if(NATIVE&&$('apkCard'))$('apkCard').classList.add('hide')}catch(e){}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&LOKON){layarNyala();tulisPos(true)}});
 function startLokasi(){
   if(!SAYA){toast('Pilih namamu dulu');return}
-  if(NATIVE&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LokasiBg){
-    const pl=window.Capacitor.Plugins.LokasiBg;LOKERR='';
-    pl.start({proyek:FB_CFG.projectId,apiKey:FB_CFG.apiKey,trip:ROOM,id:String(SAYA),nama:nama(SAYA)}).then(()=>{LOKON=true;try{localStorage.setItem('kj-lok-on','1')}catch(e){}if(pl.abaikanBaterai&&!localStorage.getItem('kj-baterai')){try{localStorage.setItem('kj-baterai','1')}catch(e){}pl.abaikanBaterai()}rLok()}).catch(err=>{LOKON=false;LOKERR=String((err&&err.message)||err).indexOf('izin')>=0?'Izin lokasi ditolak. Aktifkan izin lokasi untuk aplikasi ini di pengaturan HP.':'Gagal menyalakan lokasi latar belakang: '+((err&&err.message)||err);rLok()});
-    return;
-  }
   if(!navigator.geolocation){LOKERR='Perangkat ini tidak mendukung lokasi.';rLok();return}
   LOKERR='';LOKON=true;try{localStorage.setItem('kj-lok-on','1')}catch(e){}
   WATCH=navigator.geolocation.watchPosition(p=>{POS={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};LOKERR='';tulisPos(false);rLok()},
@@ -572,7 +561,6 @@ function startLokasi(){
 }
 function stopLokasi(diam){
   LOKON=false;try{localStorage.removeItem('kj-lok-on')}catch(e){}
-  if(NATIVE&&window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LokasiBg){try{window.Capacitor.Plugins.LokasiBg.stop()}catch(e){}}
   if(WATCH!=null){navigator.geolocation.clearWatch(WATCH);WATCH=null}
   if(LOKT){clearInterval(LOKT);LOKT=null}
   if(WL){try{WL.release()}catch(e){}WL=null}
@@ -589,7 +577,7 @@ function rLok(buka){
   $('sayaChips').innerHTML=S.orang.map(o=>`<button type="button" class="chip${o.id===SAYA?' on':''}" data-id="${o.id}">${o.id===SAYA?'✓ ':''}${esc(o.nama)}</button>`).join('')||'<span class="sub">Memuat peserta…</span>';
   const st=$('lokStatus'),tg=$('lokToggle');
   tg.textContent=LOKON?'Matikan lokasi':'Nyalakan lokasi';tg.className='btn full '+(LOKON?'ghost':'red');tg.style.marginTop='0';
-  st.innerHTML=!SAYA?'Pilih namamu di atas dulu.':LOKON?'<span class="lokon">● Lokasi aktif sebagai <b>'+esc(nama(SAYA))+'</b></span>'+(NATIVE?' · jalan di latar belakang':(POS?' · akurasi ±'+Math.round(POS.acc||0)+' m':' · mencari posisi…')):'Lokasi mati. Kamu memakai nama <b>'+esc(nama(SAYA))+'</b>.';
+  st.innerHTML=!SAYA?'Pilih namamu di atas dulu.':LOKON?'<span class="lokon">● Lokasi aktif sebagai <b>'+esc(nama(SAYA))+'</b></span>'+(POS?' · akurasi ±'+Math.round(POS.acc||0)+' m':' · mencari posisi…'):'Lokasi mati. Kamu memakai nama <b>'+esc(nama(SAYA))+'</b>.';
   if(LOKERR)st.innerHTML+='<br><span class="neg">'+esc(LOKERR)+'</span>';
   const now=Date.now(),ada=Object.values(LOK).filter(x=>x&&x.lat!=null&&x.lon!=null).sort((a,b)=>a.nama.localeCompare(b.nama));
   const segar=ada.filter(x=>now-x.ts<=LAMA_MS);
