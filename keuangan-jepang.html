@@ -41,6 +41,7 @@ th{text-align:right;font-size:10.5px;letter-spacing:.05em;text-transform:upperca
 th:first-child,td:first-child{text-align:left}
 td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--border);font-variant-numeric:tabular-nums}
 .pos{color:var(--plus);font-weight:800}.neg{color:var(--minus);font-weight:800}
+.who{padding:6px 0 4px;border-bottom:2px solid var(--border)}.who:last-child{border-bottom:0}.wh{display:flex;justify-content:space-between;font-size:14px;padding-top:6px}.wh span{font-weight:800}
 .settle{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--border);font-size:14px}
 .settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--t2);font-weight:600;font-size:11px}
 .hist{padding:11px 0;border-bottom:1px dashed var(--border)}
@@ -68,8 +69,8 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--border);font-
 <section id="v-sum">
   <div class="tot" id="tot"></div>
   <div class="card"><h2>Saldo per orang</h2><div id="saldo"></div>
-    <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain, berhak menerima. <b class="neg">Merah (−)</b> = pakai uang orang lain, harus membayar.</p></div>
-  <div class="card"><h2>Cara melunasi (paling sedikit transfer)</h2><div id="settle"></div></div>
+    <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain. <b class="neg">Merah (−)</b> = lebih banyak memakai uang orang lain. Ini hanya total. Siapa membayar ke siapa mengikuti bagian <b>Hasil akhir per orang</b> di bawah.</p></div>
+  <div class="card"><h2>Hasil akhir per orang</h2><p class="sub" style="margin-bottom:6px">Sesuai siapa memakai uang siapa. Hanya saling dikurangkan antara dua orang yang sama, tidak dialihkan lewat orang lain.</p><div id="settle"></div></div>
   <div class="card"><h2>Siapa pakai uang siapa</h2><p class="sub" style="margin-bottom:8px">Dari semua catatan, sebelum saling dikurangkan. Baris = yang memakai, kolom = pemilik uang.</p><div style="overflow-x:auto" id="matrix"></div></div>
   <div class="card"><h2>Bagikan</h2>
     <div class="row"><button class="btn" id="wa">Salin ringkasan WhatsApp</button><button class="btn ghost" id="bk">Unduh cadangan</button></div>
@@ -147,7 +148,7 @@ function hitung(){
   let total=0;
   S.cat.forEach(c=>{
     const v=idr(c);
-    if(c.t==='t'){if(!(c.dari in trf)||!(c.ke in trf))return;trf[c.dari]+=v;trf[c.ke]-=v;return}
+    if(c.t==='t'){if(!(c.dari in trf)||!(c.ke in trf))return;trf[c.dari]+=v;trf[c.ke]-=v;pair[c.ke][c.dari]=(pair[c.ke][c.dari]||0)+v;return}
     if(!(c.byr in bayar))return;
     bayar[c.byr]+=v;total+=v;
     Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(c.mu==='JPY'?c.kurs:1);pakai[id]+=sh;if(id!==c.byr)pair[id][c.byr]=(pair[id][c.byr]||0)+sh});
@@ -155,30 +156,35 @@ function hitung(){
   const saldo={};S.orang.forEach(o=>{saldo[o.id]=bayar[o.id]-pakai[o.id]+trf[o.id]});
   return{bayar,pakai,trf,pair,saldo,total};
 }
-function lunas(saldo){
-  const cr=[],db=[];S.orang.forEach(o=>{const s=Math.round(saldo[o.id]);if(s>0)cr.push({id:o.id,v:s});else if(s<0)db.push({id:o.id,v:-s})});
-  const out=[];cr.sort((a,b)=>b.v-a.v);db.sort((a,b)=>b.v-a.v);
-  let i=0,j=0;while(i<cr.length&&j<db.length){const m=Math.min(cr[i].v,db[j].v);out.push({dari:db[j].id,ke:cr[i].id,v:m});cr[i].v-=m;db[j].v-=m;if(cr[i].v===0)i++;if(db[j].v===0)j++}
+// Utang per pasangan: HANYA saling dikurangkan antara dua orang yang sama (A↔B). Tidak ada penyederhanaan lewat orang ketiga,
+// jadi hasilnya tetap sesuai siapa memakai uang siapa.
+function pasangan(pair){
+  const ids=S.orang.map(o=>o.id),out=[];
+  for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+    const a=ids[i],b=ids[j],d=Math.round((pair[a][b]||0)-(pair[b][a]||0));   // >0: a berutang ke b
+    if(d>0)out.push({dari:a,ke:b,v:d});else if(d<0)out.push({dari:b,ke:a,v:-d});
+  }
   return out;
 }
 
 /* ---------- tampilan ---------- */
 function rSum(){
-  const H=hitung(),L=lunas(H.saldo);
+  const H=hitung(),L=pasangan(H.pair);
   $('tot').innerHTML=`<div><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama · ≈ ${fJPY(H.total)}</span></div><div><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
   if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';$('matrix').innerHTML='';return}
   $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
     return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}<br><small class="sub">≈ ${fJPY(s)}</small></td></tr>`}).join('')+'</table>'+
     (H.trf&&Object.values(H.trf).some(v=>Math.abs(v)>0.5)?'<p class="sub" style="margin-top:8px">Saldo sudah memperhitungkan transfer / pinjaman yang dicatat.</p>':'');
-  $('settle').innerHTML=L.length?L.map(x=>`<div class="settle"><div><b>${esc(nama(x.dari))}</b> bayar ke <b>${esc(nama(x.ke))}</b></div><div class="amt">${fIDR(x.v)}<small>≈ ${fJPY(x.v)}</small></div></div>`).join(''):'<div class="empty">Semua sudah seimbang ✓</div>';
+  $('settle').innerHTML=L.length?S.orang.filter(o=>L.some(x=>x.dari===o.id)).map(o=>{const mine=L.filter(x=>x.dari===o.id),tot=mine.reduce((t,x)=>t+x.v,0);
+    return `<div class="who"><div class="wh"><b>${esc(o.nama)}</b> harus bayar <span>${fIDR(tot)}</span></div>`+mine.map(x=>`<div class="settle"><div>ke <b>${esc(nama(x.ke))}</b></div><div class="amt">${fIDR(x.v)}<small>≈ ${fJPY(x.v)}</small></div></div>`).join('')+'</div>'}).join(''):'<div class="empty">Semua sudah seimbang ✓</div>';
   const ids=S.orang.map(o=>o.id);
   $('matrix').innerHTML='<table><tr><th>Memakai ↓ / uang milik →</th>'+ids.map(i=>`<th>${esc(nama(i))}</th>`).join('')+'</tr>'+ids.map(a=>`<tr><td><b>${esc(nama(a))}</b></td>`+ids.map(b=>`<td>${a===b?'–':(H.pair[a][b]?fIDR(H.pair[a][b]):'')}</td>`).join('')+'</tr>').join('')+'</table>';
 }
 function ringkasWA(){
-  const H=hitung(),L=lunas(H.saldo);
+  const H=hitung(),L=pasangan(H.pair);
   let t='*KEUANGAN TRIP JEPANG*\nTotal pengeluaran bersama: '+fIDR(H.total)+' (≈ '+fJPY(H.total)+')\nKurs bawaan: 1 JPY = Rp '+S.kurs+'\n\n*Saldo*\n';
   S.orang.forEach(o=>{const s=H.saldo[o.id];t+='• '+o.nama+': bayar '+fIDR(H.bayar[o.id])+', pakai '+fIDR(H.pakai[o.id])+' → '+(Math.abs(s)<0.5?'lunas':(s>0?'berhak terima ':'harus bayar ')+fIDR(Math.abs(s)))+'\n'});
-  t+='\n*Cara melunasi*\n'+(L.length?L.map(x=>'• '+nama(x.dari)+' → '+nama(x.ke)+': '+fIDR(x.v)+' (≈ '+fJPY(x.v)+')').join('\n'):'Semua sudah seimbang ✓');
+  t+='\n*Hasil akhir per orang*\n'+(L.length?S.orang.filter(o=>L.some(x=>x.dari===o.id)).map(o=>{const m=L.filter(x=>x.dari===o.id);return '*'+o.nama+'* harus bayar '+fIDR(m.reduce((a,x)=>a+x.v,0))+'\n'+m.map(x=>'  • ke '+nama(x.ke)+': '+fIDR(x.v)+' (≈ '+fJPY(x.v)+')').join('\n')}).join('\n'):'Semua sudah seimbang ✓');
   return t;
 }
 
