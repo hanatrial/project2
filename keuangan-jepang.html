@@ -8,6 +8,8 @@
 <link rel="icon" type="image/png" href="icons/jepang-192.png"><link rel="apple-touch-icon" href="icons/jepang-apple-touch.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -41,7 +43,7 @@ main{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:14px 14px
 
 /* ---- tab ---- */
 .tabs{display:flex;gap:6px;margin:-4px 0 14px;overflow-x:auto;scrollbar-width:none}
-.tabs button{flex:1 1 0;min-width:62px;font:inherit;font-weight:700;font-size:11.5px;padding:7px 6px 8px;white-space:normal;border-radius:12px 12px 4px 4px;border:1px solid var(--line);border-bottom:3px solid transparent;background:var(--card);color:var(--mute);cursor:pointer;line-height:1.25}
+.tabs button{flex:1 1 0;min-width:56px;font:inherit;font-weight:700;font-size:11.5px;padding:7px 6px 8px;white-space:normal;border-radius:12px 12px 4px 4px;border:1px solid var(--line);border-bottom:3px solid transparent;background:var(--card);color:var(--mute);cursor:pointer;line-height:1.25}
 .tabs button .kj{display:block;font-family:'Shippori Mincho',serif;font-size:15px;font-weight:800;color:var(--ai)}
 .tabs button.on{color:var(--sumi);border-bottom-color:var(--shu);background:var(--in);box-shadow:0 3px 10px rgba(34,58,94,.12)}
 .tabs button.on .kj{color:var(--shu)}
@@ -121,6 +123,16 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .man li{margin:3px 0}.man .eg{font-size:13px;line-height:1.65;background:rgba(210,69,58,.07);border-left:3px solid var(--shu);border-radius:0 6px 6px 0;padding:9px 12px;margin:8px 0 2px}
 .man h3{font-size:13px;font-weight:800;color:var(--ai);margin:12px 0 2px}
 .hide{display:none}
+#peta{height:320px;border-radius:8px;border:1px solid var(--line);overflow:hidden;z-index:1}
+.pin{background:none;border:0}.pin span{display:inline-block;transform:translate(-50%,-100%);background:var(--ai);color:#fff;border-radius:999px;padding:2px 9px;font:800 11px/1.5 'Zen Maru Gothic',sans-serif;white-space:nowrap;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pin.me span{background:var(--shu)}.pin.lama span{background:#8a8f9c}
+.lokrow{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}.lokrow:last-child{border-bottom:0}
+.lokrow small{display:block;color:var(--mute);font-size:11px}
+.grp{background:var(--in);border:1px solid var(--line);border-left:4px solid var(--matcha);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:13.5px;line-height:1.5}
+.grp b{font-weight:800}.grp small{display:block;color:var(--mute);font-size:11.5px}
+.sayachips .chip.on{background:var(--shu);border-color:var(--shu)}
+.lokon{font-size:11.5px;font-weight:800;color:var(--plus)}
+
 .linkbox{display:flex;gap:6px;margin-top:8px}.linkbox input{font-size:12px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ai);color:#fff;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;border-left:4px solid var(--shu)}
 .toast.on{opacity:1}
@@ -160,7 +172,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <main>
 <div id="sinkStat" class="sinkstat"></div>
 <div class="tabs" id="tabs">
-  <button data-t="sum" class="on"><span class="kj">集計</span>Ringkasan</button><button data-t="add"><span class="kj">記録</span>Catat</button><button data-t="his"><span class="kj">履歴</span>Riwayat</button><button data-t="set"><span class="kj">設定</span>Peserta &amp; Kurs</button><button data-t="man"><span class="kj">説明</span>Manual</button>
+  <button data-t="sum" class="on"><span class="kj">集計</span>Ringkasan</button><button data-t="add"><span class="kj">記録</span>Catat</button><button data-t="his"><span class="kj">履歴</span>Riwayat</button><button data-t="set"><span class="kj">設定</span>Peserta &amp; Kurs</button><button data-t="lok"><span class="kj">位置</span>Lokasi</button><button data-t="man"><span class="kj">説明</span>Manual</button>
 </div>
 
 <!-- RINGKASAN -->
@@ -211,6 +223,21 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
     <p class="sub" style="margin-top:6px">Dipakai sebagai isian awal saat mencatat dalam yen. Tiap catatan menyimpan kursnya sendiri, jadi mengubah kurs ini tidak mengubah catatan lama.</p></div>
 </section>
 
+<!-- LOKASI -->
+<section id="v-lok" class="hide">
+  <div class="card"><h2>Siapa kamu?<span class="kj">自分</span></h2>
+    <p class="sub" style="margin-bottom:6px">Pilih namamu dulu. Pilihan diingat di HP ini.</p>
+    <div class="chips sayachips" id="sayaChips"></div></div>
+  <div class="card"><h2>Bagikan lokasiku<span class="kj">共有</span></h2>
+    <div id="lokStatus" class="sub" style="margin-bottom:8px"></div>
+    <button class="btn red full" id="lokToggle" type="button" style="margin-top:0">Nyalakan lokasi</button>
+    <p class="sub" style="margin-top:10px">Posisi dikirim tiap beberapa detik <b>selama aplikasi terbuka di layar</b>. Saat aplikasi ditutup atau layar terkunci, HP biasanya berhenti mengirim. Selama berbagi, layar dijaga tetap menyala (lebih boros baterai). Semua peserta bisa melihat posisimu. Matikan kapan saja.</p></div>
+  <div class="card"><h2>Peta<span class="kj">地図</span></h2>
+    <div id="peta"></div><div id="petaInfo" class="sub" style="margin-top:6px"></div>
+    <button class="btn ghost small" id="petaPusat" type="button" style="margin-top:8px">Pusatkan ke semua orang</button></div>
+  <div class="card"><h2>Siapa sama siapa<span class="kj">一緒</span></h2><div id="grup"></div></div>
+</section>
+
 <!-- MANUAL -->
 <section id="v-man" class="hide man">
   <div class="card"><h2>Apa ini?<span class="kj">概要</span></h2>
@@ -240,6 +267,14 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
       <li>Kalau <b>sudah bayar</b> (atau sudah menerima), <b>centang kotaknya</b>. Barisnya dicoret dan jadi “lunas ✓”. Centang terlihat oleh semua peserta.</li>
       <li>Utang <b>hanya saling dikurangkan antara dua orang yang sama</b>. Tidak dialihkan lewat orang lain, jadi hasilnya sesuai siapa memakai uang siapa.</li>
       <li>Kalau setelah dicentang ada pengeluaran baru yang menambah utang, sisanya muncul lagi.</li>
+    </ul></div>
+
+  <div class="card"><h2>Lokasi<span class="kj">位置</span></h2>
+    <ul>
+      <li>Di tab <b>Lokasi</b>, pilih <b>namamu</b>, lalu ketuk <b>Nyalakan lokasi</b> dan izinkan lokasi saat diminta.</li>
+      <li>Peta menampilkan posisi semua yang sedang berbagi, dan <b>Siapa sama siapa</b> mengelompokkan yang berdekatan (kurang dari sekitar 100 m).</li>
+      <li>Posisi hanya terkirim <b>saat aplikasi terbuka di layar</b>. Kalau ditutup atau layar terkunci, posisi berhenti diperbarui dan tampil abu-abu dengan waktu terakhirnya.</li>
+      <li>Matikan dengan tombol yang sama. Posisimu langsung hilang dari peta.</li>
     </ul></div>
 
   <div class="card"><h2>Yen dan kurs<span class="kj">為替</span></h2>
@@ -415,7 +450,7 @@ function rOrang(){
   $('kursList').innerHTML=Object.keys(MATA).map(m=>`<label>1 ${m} (${MATA[m].s}) = … Rp · ${MATA[m].nama}</label><input data-m="${m}" inputmode="decimal" value="${fK(kursDari(m))}">`).join('');
 }
 function rAll(){rOrang();rForm();rSum();rHist()}
-function tab(t){['sum','add','his','set','man'].forEach(k=>$('v-'+k).classList.toggle('hide',k!==t));document.querySelectorAll('#tabs button').forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);if(on&&b.scrollIntoView)b.scrollIntoView({inline:'center',block:'nearest'})});if(t==='his')rHist();window.scrollTo(0,0)}
+function tab(t){['sum','add','his','set','lok','man'].forEach(k=>$('v-'+k).classList.toggle('hide',k!==t));document.querySelectorAll('#tabs button').forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);if(on&&b.scrollIntoView)b.scrollIntoView({inline:'center',block:'nearest'})});if(t==='his')rHist();if(t==='lok')rLok(true);window.scrollTo(0,0)}
 
 /* peristiwa */
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
@@ -448,6 +483,7 @@ function startSync(){
   const gagal=err=>setST('gagal',(err&&err.code)||'error');
   const rr=roomRef();
   UNS.push(rr.onSnapshot(sn=>{R.room=sn.exists?(sn.data()||{}):{};GOT.room=1;applyRemote()},gagal));
+  UNS.push(rr.collection('lokasi').onSnapshot(sn=>{LOK={};sn.forEach(d=>{LOK[d.id]=d.data()});rLok()},()=>{}));
   NAMA_KOLEKSI.forEach(n=>UNS.push(rr.collection(n).onSnapshot(sn=>{const o={};sn.forEach(d=>{o[d.id]=d.data()});R[n]=o;GOT[n]=1;applyRemote()},gagal)));
 }
 function applyRemote(){
@@ -493,6 +529,81 @@ function rSink(){
   else box.innerHTML='<p class="sub"><b style="color:var(--minus)">Gagal tersambung'+(STMSG?' ('+esc(STMSG)+')':'')+'.</b> '+(/permission/i.test(STMSG)?'Aturan Firestore untuk koleksi <b>keuangan_jepang</b> belum dipasang.':'Cek koneksi internet lalu coba lagi.')+'</p><button class="btn ghost small" id="sinkLagi" type="button" style="margin-top:6px">Coba lagi</button>';
 }
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(t&&t.id==='sinkLagi')startSync()});
+/* ---------- lokasi realtime (hanya saat aplikasi terbuka) ---------- */
+let SAYA=0;try{SAYA=+localStorage.getItem('kj-saya')||0}catch(e){}
+let LOK={},LOKON=false,WATCH=null,POS=null,LAST=null,LOKT=null,WL=null,MAP=null,MARK={},LOKERR='',FITTED=false;
+const LAMA_MS=15*60*1000;   // lebih dari 15 menit = dianggap lama (abu-abu)
+const jarak=(a,b)=>{const R0=6371000,t=Math.PI/180,dl=(b.lat-a.lat)*t,dn=(b.lon-a.lon)*t,x=Math.sin(dl/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dn/2)**2;return 2*R0*Math.asin(Math.sqrt(x))};
+const lalu=ts=>{const d=Math.max(0,Math.round((Date.now()-ts)/1000));return d<20?'baru saja':d<90?d+' dtk lalu':d<5400?Math.round(d/60)+' menit lalu':Math.round(d/3600)+' jam lalu'};
+const fM=m=>m<1000?Math.round(m)+' m':(m/1000).toFixed(1).replace('.',',')+' km';
+function setSaya(id){if(LOKON)stopLokasi(true);SAYA=id;try{localStorage.setItem('kj-saya',String(id));localStorage.removeItem('kj-lok-on')}catch(e){}rLok()}
+const lokCol=()=>(DB&&ROOM)?roomRef().collection('lokasi'):null;
+function tulisPos(force){
+  const c=lokCol();if(!c||!POS||!SAYA)return;
+  const now=Date.now(),moved=!LAST||jarak(LAST,POS)>=15;
+  if(!force&&!moved&&now-LAST.t<60000)return;     // diam: cukup denyut tiap 60 dtk
+  LAST={lat:POS.lat,lon:POS.lon,t:now};
+  c.doc(String(SAYA)).set({id:SAYA,nama:nama(SAYA),lat:POS.lat,lon:POS.lon,acc:Math.round(POS.acc||0),ts:now}).catch(()=>{});
+}
+async function layarNyala(){try{if(navigator.wakeLock&&!WL){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>{WL=null})}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&LOKON){layarNyala();tulisPos(true)}});
+function startLokasi(){
+  if(!SAYA){toast('Pilih namamu dulu');return}
+  if(!navigator.geolocation){LOKERR='Perangkat ini tidak mendukung lokasi.';rLok();return}
+  LOKERR='';LOKON=true;try{localStorage.setItem('kj-lok-on','1')}catch(e){}
+  WATCH=navigator.geolocation.watchPosition(p=>{POS={lat:p.coords.latitude,lon:p.coords.longitude,acc:p.coords.accuracy};LOKERR='';tulisPos(false);rLok()},
+    err=>{LOKERR=err.code===1?'Izin lokasi ditolak. Aktifkan izin lokasi untuk aplikasi ini di pengaturan HP.':'Lokasi belum tersedia ('+err.message+'). Coba lagi di tempat terbuka.';rLok()},
+    {enableHighAccuracy:true,maximumAge:5000,timeout:30000});
+  LOKT=setInterval(()=>tulisPos(false),15000);
+  layarNyala();rLok();
+}
+function stopLokasi(diam){
+  LOKON=false;try{localStorage.removeItem('kj-lok-on')}catch(e){}
+  if(WATCH!=null){navigator.geolocation.clearWatch(WATCH);WATCH=null}
+  if(LOKT){clearInterval(LOKT);LOKT=null}
+  if(WL){try{WL.release()}catch(e){}WL=null}
+  const c=lokCol();if(c&&SAYA)c.doc(String(SAYA)).delete().catch(()=>{});
+  POS=null;LAST=null;if(!diam)rLok();
+}
+function kelompok(L){   // gabung yang berdekatan (<= max(100 m, jumlah akurasi))
+  const par=L.map((_,i)=>i),f=i=>par[i]===i?i:(par[i]=f(par[i]));
+  for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){if(jarak(L[i],L[j])<=Math.max(100,(L[i].acc||0)+(L[j].acc||0)))par[f(i)]=f(j)}
+  const m={};L.forEach((x,i)=>{(m[f(i)]=m[f(i)]||[]).push(x)});return Object.values(m);
+}
+function rLok(buka){
+  if(!$('sayaChips'))return;
+  $('sayaChips').innerHTML=S.orang.map(o=>`<button type="button" class="chip${o.id===SAYA?' on':''}" data-id="${o.id}">${o.id===SAYA?'✓ ':''}${esc(o.nama)}</button>`).join('')||'<span class="sub">Memuat peserta…</span>';
+  const st=$('lokStatus'),tg=$('lokToggle');
+  tg.textContent=LOKON?'Matikan lokasi':'Nyalakan lokasi';tg.className='btn full '+(LOKON?'ghost':'red');tg.style.marginTop='0';
+  st.innerHTML=!SAYA?'Pilih namamu di atas dulu.':LOKON?'<span class="lokon">● Lokasi aktif sebagai <b>'+esc(nama(SAYA))+'</b></span>'+(POS?' · akurasi ±'+Math.round(POS.acc||0)+' m':' · mencari posisi…'):'Lokasi mati. Kamu memakai nama <b>'+esc(nama(SAYA))+'</b>.';
+  if(LOKERR)st.innerHTML+='<br><span class="neg">'+esc(LOKERR)+'</span>';
+  const now=Date.now(),ada=Object.values(LOK).filter(x=>x&&x.lat!=null&&x.lon!=null).sort((a,b)=>a.nama.localeCompare(b.nama));
+  const segar=ada.filter(x=>now-x.ts<=LAMA_MS);
+  // daftar & kelompok
+  const gr=kelompok(segar).sort((a,b)=>b.length-a.length);
+  $('grup').innerHTML=ada.length?(gr.filter(g=>g.length>1).map(g=>{let m=0;for(let i=0;i<g.length;i++)for(let j=i+1;j<g.length;j++)m=Math.max(m,jarak(g[i],g[j]));return `<div class="grp">👥 <b>${g.map(x=>esc(x.nama)).join(', ')}</b><small>bersama, saling berjarak maksimal ${fM(m)}</small></div>`}).join('')+
+    (gr.filter(g=>g.length===1).length?'<div class="grp" style="border-left-color:var(--line)">🚶 <b>Sendiri:</b> '+gr.filter(g=>g.length===1).map(g=>esc(g[0].nama)).join(', ')+'</div>':'')+
+    ada.map(x=>{const lm=now-x.ts>LAMA_MS;return `<div class="lokrow"><span>${esc(x.nama)}${x.id===SAYA?' (kamu)':''}<small>${lm?'terakhir terlihat ':''}${lalu(x.ts)} · ±${x.acc||0} m</small></span><span>${lm?'<span class="sub">abu-abu di peta</span>':''}</span></div>`}).join('')):'<div class="empty">Belum ada yang membagikan lokasi.</div>';
+  $('petaInfo').textContent=ada.length?ada.length+' orang di peta'+(ada.length!==segar.length?' ('+(ada.length-segar.length)+' lokasinya sudah lama)':''):'Peta akan terisi kalau ada yang menyalakan lokasi.';
+  gambarPeta(ada,buka===true);
+}
+function gambarPeta(ada,fit){
+  if(!window.L||!$('peta')||$('v-lok').classList.contains('hide'))return;
+  if(!MAP){MAP=L.map('peta',{zoomControl:true}).setView([1.3,103.8],4);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(MAP)}
+  MAP.invalidateSize();setTimeout(()=>MAP.invalidateSize(),80);
+  if(ada.length&&!FITTED){fit=true;FITTED=true}
+  const now=Date.now(),ids=new Set(ada.map(x=>String(x.id)));
+  Object.keys(MARK).forEach(k=>{if(!ids.has(k)){MAP.removeLayer(MARK[k]);delete MARK[k]}});
+  ada.forEach(x=>{const k=String(x.id),cls='pin'+(x.id===SAYA?' me':'')+((now-x.ts>LAMA_MS)?' lama':''),ic=L.divIcon({className:cls,html:'<span>'+esc(x.nama)+'</span>',iconSize:[0,0]});
+    if(MARK[k]){MARK[k].setLatLng([x.lat,x.lon]);MARK[k].setIcon(ic)}else MARK[k]=L.marker([x.lat,x.lon],{icon:ic}).addTo(MAP)});
+  if(fit&&ada.length){const b=L.latLngBounds(ada.map(x=>[x.lat,x.lon]));ada.length===1?MAP.setView(b.getCenter(),16):MAP.fitBounds(b,{padding:[40,40],maxZoom:17})}
+}
+document.addEventListener('click',e=>{
+  const c=e.target.closest('#sayaChips .chip');if(c){setSaya(+c.dataset.id);return}
+  if(e.target.closest('#lokToggle')){LOKON?stopLokasi():startLokasi();return}
+  if(e.target.closest('#petaPusat')){rLok(true)}
+});
+setInterval(()=>{if(!$('v-lok').classList.contains('hide'))rLok()},20000);   // segarkan "x menit lalu"
 rSink();
-if(GATED){gateTampil()}else{startSync()}
+if(GATED){gateTampil()}else{startSync();try{if(SAYA&&localStorage.getItem('kj-lok-on')==='1')setTimeout(()=>startLokasi(),1200)}catch(e){}}
 </script></body></html>
