@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keuangan Trip Jepang</title>
+<meta name="theme-color" content="#072E23">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E6F1E8;--card:rgba(255,255,255,.82);--border:rgba(7,46,35,.13);--t1:#072E23;--t2:#4B6B5E;--ac:#1D4D43;--pale:#CFE7D5;--plus:#15803d;--minus:#b91c1c;--in:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#051E20;--card:rgba(207,231,213,.07);--border:rgba(207,231,213,.15);--t1:#E3F0E6;--t2:#8FB2A1;--ac:#9CC4B0;--plus:#6ee7a0;--minus:#fca5a5;--in:rgba(207,231,213,.06)}}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-gradient(180deg,#F1F8F2,var(--bg) 45%,#D7E8D9) fixed;color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased}
+@media(prefers-color-scheme:dark){body{background:linear-gradient(180deg,#0B3A33,#051E20 55%,#03161A) fixed}}
+.top{position:sticky;top:0;z-index:10;background:#072E23;color:#EAF4EC;height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.top b{font-size:15px;font-weight:800}.top a{color:#CFE7D5;text-decoration:none;font-weight:700;font-size:13px}
+main{max-width:760px;margin:0 auto;padding:16px 14px 70px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:1 0 auto;font:inherit;font-weight:700;font-size:13px;padding:9px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--t2);cursor:pointer;white-space:nowrap}
+.tabs button.on{background:#072E23;color:#CFE7D5;border-color:#072E23}
+@media(prefers-color-scheme:dark){.tabs button.on{background:#CFE7D5;color:#072E23}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;font-weight:800;margin-bottom:10px}
+.sub{font-size:12px;color:var(--t2);line-height:1.5}
+label{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--in);color:var(--t1);outline:none}
+input:focus,select:focus{border-color:var(--ac)}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.btn{font:inherit;font-weight:800;font-size:14px;border:0;border-radius:12px;padding:11px 16px;cursor:pointer;background:#072E23;color:#CFE7D5}
+@media(prefers-color-scheme:dark){.btn{background:#CFE7D5;color:#072E23}}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--t1)}
+.btn.small{padding:6px 10px;font-size:12px;border-radius:9px}
+.btn.full{width:100%;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{font:inherit;font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--in);color:var(--t2);cursor:pointer}
+.chip.on{background:#1D4D43;color:#fff;border-color:#1D4D43}
+.person{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--border);font-weight:700}
+.person:last-child{border-bottom:0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:right;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);padding:6px 4px;border-bottom:1px solid var(--border)}
+th:first-child,td:first-child{text-align:left}
+td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--border);font-variant-numeric:tabular-nums}
+.pos{color:var(--plus);font-weight:800}.neg{color:var(--minus);font-weight:800}
+.settle{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--border);font-size:14px}
+.settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--t2);font-weight:600;font-size:11px}
+.hist{padding:11px 0;border-bottom:1px dashed var(--border)}
+.hist:last-child{border-bottom:0}
+.hist .h1{display:flex;gap:8px;justify-content:space-between;font-weight:700;font-size:14px}
+.hist .h2{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5}
+.hist .act{display:flex;gap:6px;margin-top:7px}
+.tot{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tot div{flex:1 1 140px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px}
+.tot b{display:block;font-size:17px;font-weight:800}.tot span{font-size:11px;color:var(--t2)}
+.warn{font-size:12px;color:var(--minus);font-weight:700;margin-top:8px}
+.note{font-size:12px;color:var(--t2);line-height:1.55;border-left:3px solid var(--ac);padding:8px 12px;background:rgba(29,77,67,.07);border-radius:0 10px 10px 0;margin-bottom:12px}
+.empty{text-align:center;color:var(--t2);padding:22px 0;font-size:13px}
+.hide{display:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#072E23;color:#E3F0E6;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast.on{opacity:1}
+</style></head><body>
+<div class="top"><a href="./">←</a><b>🇯🇵 Keuangan Trip Jepang</b><span style="width:20px"></span></div>
+<main>
+<div class="tabs" id="tabs">
+  <button data-t="sum" class="on">Ringkasan</button><button data-t="add">Catat</button><button data-t="his">Riwayat</button><button data-t="set">Peserta &amp; Kurs</button>
+</div>
+
+<!-- RINGKASAN -->
+<section id="v-sum">
+  <div class="tot" id="tot"></div>
+  <div class="card"><h2>Saldo per orang</h2><div id="saldo"></div>
+    <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain, berhak menerima. <b class="neg">Merah (−)</b> = pakai uang orang lain, harus membayar.</p></div>
+  <div class="card"><h2>Cara melunasi (paling sedikit transfer)</h2><div id="settle"></div></div>
+  <div class="card"><h2>Siapa pakai uang siapa</h2><p class="sub" style="margin-bottom:8px">Dari semua catatan, sebelum saling dikurangkan. Baris = yang memakai, kolom = pemilik uang.</p><div style="overflow-x:auto" id="matrix"></div></div>
+  <div class="card"><h2>Bagikan</h2>
+    <div class="row"><button class="btn" id="wa">Salin ringkasan WhatsApp</button><button class="btn ghost" id="bk">Unduh cadangan</button></div>
+    <label>Pulihkan dari cadangan (file .json)</label><input type="file" id="rs" accept="application/json,.json">
+    <button class="btn ghost full" id="reset" style="color:var(--minus)">Hapus semua catatan</button>
+    <p class="sub" style="margin-top:10px">Data disimpan <b>hanya di HP ini</b>, tidak diunggah ke mana pun. Halaman ini bisa dibuka siapa saja, jadi angka di sini tidak terlihat orang lain. Untuk menyamakan data antar HP, unduh cadangan lalu pulihkan di HP lain.</p></div>
+</section>
+
+<!-- CATAT -->
+<section id="v-add" class="hide">
+  <div class="card">
+    <h2 id="addTitle">Catat baru</h2>
+    <div class="chips" id="jenis"><button class="chip on" data-j="x">Pengeluaran bersama</button><button class="chip" data-j="t">Transfer / pinjam</button></div>
+
+    <div id="fx">
+      <label>Keterangan</label><input id="ket" placeholder="mis. Ramen Ichiran, tiket Shinkansen">
+      <div class="row"><div><label>Tanggal</label><input type="date" id="tgl"></div><div><label>Kategori</label><select id="kat"><option>Makan</option><option>Transport</option><option>Belanja</option><option>Hotel</option><option>Tiket / wisata</option><option>Lain-lain</option></select></div></div>
+      <div class="row"><div><label>Jumlah</label><input id="jml" inputmode="decimal" placeholder="0"></div><div><label>Mata uang</label><select id="mu"><option value="JPY">JPY (¥)</option><option value="IDR">IDR (Rp)</option></select></div></div>
+      <div id="kursRow"><label>Kurs: 1 JPY = … Rp (untuk catatan ini)</label><input id="kurs" inputmode="decimal"></div>
+      <label>Dibayar oleh (pakai uang siapa)</label><select id="byr"></select>
+      <label>Dipakai untuk siapa</label><div class="chips" id="pakai"></div>
+      <div style="margin-top:6px"><button class="btn ghost small" id="semua" type="button">Pilih semua</button></div>
+      <label>Pembagian</label><select id="mode"><option value="rata">Rata</option><option value="custom">Nominal per orang</option></select>
+      <div id="customBox" class="hide"></div>
+    </div>
+
+    <div id="ft" class="hide">
+      <p class="note">Dipakai kalau satu orang meminjamkan atau menyerahkan uang ke orang lain, atau saat melunasi utang. Saldo orang yang memberi bertambah, yang menerima berkurang.</p>
+      <label>Keterangan (opsional)</label><input id="tket" placeholder="mis. Pinjam tunai, lunas ramen">
+      <div class="row"><div><label>Dari (memberi)</label><select id="tdari"></select></div><div><label>Ke (menerima)</label><select id="tke"></select></div></div>
+      <div class="row"><div><label>Jumlah</label><input id="tjml" inputmode="decimal" placeholder="0"></div><div><label>Mata uang</label><select id="tmu"><option value="JPY">JPY (¥)</option><option value="IDR">IDR (Rp)</option></select></div></div>
+      <div id="tkursRow"><label>Kurs: 1 JPY = … Rp</label><input id="tkurs" inputmode="decimal"></div>
+      <label>Tanggal</label><input type="date" id="ttgl">
+    </div>
+
+    <div class="warn" id="err"></div>
+    <button class="btn full" id="simpan">Simpan</button>
+    <button class="btn ghost full hide" id="batal">Batal edit</button>
+  </div>
+</section>
+
+<!-- RIWAYAT -->
+<section id="v-his" class="hide">
+  <div class="card"><h2>Riwayat</h2><select id="fOrang"></select><div id="hist" style="margin-top:6px"></div></div>
+</section>
+
+<!-- PESERTA & KURS -->
+<section id="v-set" class="hide">
+  <div class="card"><h2>Peserta</h2>
+    <div class="row"><input id="nama" placeholder="Nama peserta"><button class="btn" id="tambah" style="flex:0 0 auto">Tambah</button></div>
+    <div id="orang" style="margin-top:8px"></div></div>
+  <div class="card"><h2>Kurs bawaan</h2><label>1 JPY = … Rp</label><input id="kursDef" inputmode="decimal">
+    <p class="sub" style="margin-top:6px">Dipakai sebagai isian awal saat mencatat dalam yen. Tiap catatan menyimpan kursnya sendiri, jadi mengubah kurs ini tidak mengubah catatan lama.</p></div>
+</section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='keuangan-jepang-v1',$=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={orang:[],cat:[],kurs:110,nid:1};
+try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.orang)&&Array.isArray(x.cat))S=Object.assign(S,x)}catch(e){}
+const simpanS=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const fIDR=n=>(n<0?'−':'')+'Rp '+Math.round(Math.abs(n)).toLocaleString('id-ID');
+const fJPY=n=>(n<0?'−':'')+'¥'+Math.round(Math.abs(n)/S.kurs).toLocaleString('en-US');
+const num=v=>{v=String(v||'').trim().replace(/\s/g,'');if(!v)return NaN;if(/,/.test(v)&&/\./.test(v))v=v.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');else v=v.replace(',','.');return parseFloat(v)};
+const nama=id=>{const o=S.orang.find(x=>x.id===id);return o?o.nama:'(dihapus)'};
+const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1800)};
+const hariIni=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const idr=c=>c.mu==='JPY'?c.jml*c.kurs:c.jml;   // nilai catatan dalam rupiah
+
+/* ---------- hitung ---------- */
+function hitung(){
+  const bayar={},pakai={},trf={},pair={};   // pair[pemakai][pemilik]
+  S.orang.forEach(o=>{bayar[o.id]=0;pakai[o.id]=0;trf[o.id]=0;pair[o.id]={}});
+  let total=0;
+  S.cat.forEach(c=>{
+    const v=idr(c);
+    if(c.t==='t'){if(!(c.dari in trf)||!(c.ke in trf))return;trf[c.dari]+=v;trf[c.ke]-=v;return}
+    if(!(c.byr in bayar))return;
+    bayar[c.byr]+=v;total+=v;
+    Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(c.mu==='JPY'?c.kurs:1);pakai[id]+=sh;if(id!==c.byr)pair[id][c.byr]=(pair[id][c.byr]||0)+sh});
+  });
+  const saldo={};S.orang.forEach(o=>{saldo[o.id]=bayar[o.id]-pakai[o.id]+trf[o.id]});
+  return{bayar,pakai,trf,pair,saldo,total};
+}
+function lunas(saldo){
+  const cr=[],db=[];S.orang.forEach(o=>{const s=Math.round(saldo[o.id]);if(s>0)cr.push({id:o.id,v:s});else if(s<0)db.push({id:o.id,v:-s})});
+  const out=[];cr.sort((a,b)=>b.v-a.v);db.sort((a,b)=>b.v-a.v);
+  let i=0,j=0;while(i<cr.length&&j<db.length){const m=Math.min(cr[i].v,db[j].v);out.push({dari:db[j].id,ke:cr[i].id,v:m});cr[i].v-=m;db[j].v-=m;if(cr[i].v===0)i++;if(db[j].v===0)j++}
+  return out;
+}
+
+/* ---------- tampilan ---------- */
+function rSum(){
+  const H=hitung(),L=lunas(H.saldo);
+  $('tot').innerHTML=`<div><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama · ≈ ${fJPY(H.total)}</span></div><div><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
+  if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';$('matrix').innerHTML='';return}
+  $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
+    return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}<br><small class="sub">≈ ${fJPY(s)}</small></td></tr>`}).join('')+'</table>'+
+    (H.trf&&Object.values(H.trf).some(v=>Math.abs(v)>0.5)?'<p class="sub" style="margin-top:8px">Saldo sudah memperhitungkan transfer / pinjaman yang dicatat.</p>':'');
+  $('settle').innerHTML=L.length?L.map(x=>`<div class="settle"><div><b>${esc(nama(x.dari))}</b> bayar ke <b>${esc(nama(x.ke))}</b></div><div class="amt">${fIDR(x.v)}<small>≈ ${fJPY(x.v)}</small></div></div>`).join(''):'<div class="empty">Semua sudah seimbang ✓</div>';
+  const ids=S.orang.map(o=>o.id);
+  $('matrix').innerHTML='<table><tr><th>Memakai ↓ / uang milik →</th>'+ids.map(i=>`<th>${esc(nama(i))}</th>`).join('')+'</tr>'+ids.map(a=>`<tr><td><b>${esc(nama(a))}</b></td>`+ids.map(b=>`<td>${a===b?'–':(H.pair[a][b]?fIDR(H.pair[a][b]):'')}</td>`).join('')+'</tr>').join('')+'</table>';
+}
+function ringkasWA(){
+  const H=hitung(),L=lunas(H.saldo);
+  let t='*KEUANGAN TRIP JEPANG*\nTotal pengeluaran bersama: '+fIDR(H.total)+' (≈ '+fJPY(H.total)+')\nKurs bawaan: 1 JPY = Rp '+S.kurs+'\n\n*Saldo*\n';
+  S.orang.forEach(o=>{const s=H.saldo[o.id];t+='• '+o.nama+': bayar '+fIDR(H.bayar[o.id])+', pakai '+fIDR(H.pakai[o.id])+' → '+(Math.abs(s)<0.5?'lunas':(s>0?'berhak terima ':'harus bayar ')+fIDR(Math.abs(s)))+'\n'});
+  t+='\n*Cara melunasi*\n'+(L.length?L.map(x=>'• '+nama(x.dari)+' → '+nama(x.ke)+': '+fIDR(x.v)+' (≈ '+fJPY(x.v)+')').join('\n'):'Semua sudah seimbang ✓');
+  return t;
+}
+
+/* form */
+let editId=null,pakaiSet=new Set(),jenis='x';
+function opsOrang(sel,val){sel.innerHTML=S.orang.map(o=>`<option value="${o.id}">${esc(o.nama)}</option>`).join('');if(val!=null)sel.value=val}
+function rForm(){
+  const has=v=>S.orang.some(o=>String(o.id)===String(v));
+  const kb=$('byr').value,kd=$('tdari').value,kk=$('tke').value;   // pertahankan pilihan saat form digambar ulang (mis. setelah ganti mata uang)
+  opsOrang($('byr'),has(kb)?kb:(S.orang[0]&&S.orang[0].id));opsOrang($('tdari'),has(kd)?kd:(S.orang[0]&&S.orang[0].id));opsOrang($('tke'),has(kk)?kk:(S.orang[1]?S.orang[1].id:undefined));
+  $('pakai').innerHTML=S.orang.map(o=>`<button type="button" class="chip${pakaiSet.has(o.id)?' on':''}" data-id="${o.id}">${esc(o.nama)}</button>`).join('')||'<span class="sub">Belum ada peserta.</span>';
+  rCustom();
+  $('kursRow').classList.toggle('hide',$('mu').value!=='JPY');$('tkursRow').classList.toggle('hide',$('tmu').value!=='JPY');
+}
+function rCustom(){
+  const m=$('mode').value==='custom';$('customBox').classList.toggle('hide',!m);if(!m)return;
+  const keep={};document.querySelectorAll('#customBox input').forEach(i=>keep[i.dataset.id]=i.value);
+  $('customBox').innerHTML=[...pakaiSet].map(id=>`<label>${esc(nama(id))}</label><input inputmode="decimal" data-id="${id}" value="${keep[id]||''}" placeholder="nominal dalam mata uang di atas">`).join('')||'<p class="sub">Pilih dulu siapa yang memakai.</p>';
+}
+function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('ft').classList.toggle('hide',j!=='t')}
+function resetForm(){editId=null;['ket','jml','tket','tjml'].forEach(i=>$(i).value='');$('tgl').value=$('ttgl').value=hariIni();$('kurs').value=$('tkurs').value=S.kurs;$('mu').value=$('tmu').value='JPY';$('mode').value='rata';
+  pakaiSet=new Set(S.orang.map(o=>o.id));$('addTitle').textContent='Catat baru';$('batal').classList.add('hide');$('err').textContent='';setJenis('x');rForm()}
+function simpan(){
+  const err=m=>{$('err').textContent=m;return false};
+  if(S.orang.length<2)return err('Tambah minimal 2 peserta dulu di tab Peserta & Kurs.');
+  if(jenis==='x'){
+    const jml=num($('jml').value),kurs=num($('kurs').value),mu=$('mu').value;
+    if(!(jml>0))return err('Isi jumlah dengan angka lebih dari 0.');
+    if(mu==='JPY'&&!(kurs>0))return err('Isi kurs.');
+    if(!pakaiSet.size)return err('Pilih siapa yang memakai.');
+    const bagi={};
+    if($('mode').value==='rata'){[...pakaiSet].forEach(id=>bagi[id]=jml/pakaiSet.size)}
+    else{let sum=0;let ok=true;document.querySelectorAll('#customBox input').forEach(i=>{const v=num(i.value);if(!(v>=0)){ok=false}else{bagi[i.dataset.id]=v;sum+=v}});
+      if(!ok)return err('Isi nominal semua orang yang dipilih.');
+      if(Math.abs(sum-jml)>0.5)return err('Jumlah nominal ('+Math.round(sum).toLocaleString('id-ID')+') belum sama dengan total ('+Math.round(jml).toLocaleString('id-ID')+').')}
+    const c={id:editId||S.nid++,t:'x',tgl:$('tgl').value||hariIni(),ket:$('ket').value.trim()||'(tanpa keterangan)',kat:$('kat').value,jml,mu,kurs:mu==='JPY'?kurs:1,byr:+$('byr').value,bagi};
+    put(c);
+  }else{
+    const jml=num($('tjml').value),mu=$('tmu').value,kurs=num($('tkurs').value);
+    if(!(jml>0))return err('Isi jumlah dengan angka lebih dari 0.');
+    if(mu==='JPY'&&!(kurs>0))return err('Isi kurs.');
+    if($('tdari').value===$('tke').value)return err('Pemberi dan penerima tidak boleh orang yang sama.');
+    put({id:editId||S.nid++,t:'t',tgl:$('ttgl').value||hariIni(),ket:$('tket').value.trim()||'Transfer',jml,mu,kurs:mu==='JPY'?kurs:1,dari:+$('tdari').value,ke:+$('tke').value});
+  }
+  $('err').textContent='';simpanS();toast(editId?'Perubahan disimpan ✓':'Tersimpan ✓');resetForm();rAll();tab('sum');
+}
+function put(c){const i=S.cat.findIndex(x=>x.id===c.id);if(i>=0)S.cat[i]=c;else S.cat.push(c)}
+function rHist(){
+  const f=$('fOrang').value;let L=S.cat.slice().sort((a,b)=>String(b.tgl).localeCompare(String(a.tgl))||b.id-a.id);
+  if(f)L=L.filter(c=>c.t==='t'?(c.dari==f||c.ke==f):(c.byr==f||c.bagi[f]!==undefined));
+  $('hist').innerHTML=L.length?L.map(c=>{const v=idr(c),asli=c.mu==='JPY'?'¥'+Math.round(c.jml).toLocaleString('en-US')+' × '+c.kurs+' = ':'';
+    const d=c.t==='t'?`<b>${esc(nama(c.dari))}</b> → <b>${esc(nama(c.ke))}</b>`:`Dibayar <b>${esc(nama(c.byr))}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
+    return `<div class="hist"><div class="h1"><span>${c.t==='t'?'↔ ':''}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)}${c.t==='x'?' · '+esc(c.kat):''}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
+}
+function rOrang(){
+  $('orang').innerHTML=S.orang.length?S.orang.map(o=>`<div class="person"><span>${esc(o.nama)}</span><button class="btn ghost small" data-x="${o.id}">Hapus</button></div>`).join(''):'<div class="empty">Belum ada peserta.</div>';
+  $('fOrang').innerHTML='<option value="">Semua orang</option>'+S.orang.map(o=>`<option value="${o.id}">${esc(o.nama)}</option>`).join('');
+  $('kursDef').value=S.kurs;
+}
+function rAll(){rOrang();rForm();rSum();rHist()}
+function tab(t){['sum','add','his','set'].forEach(k=>$('v-'+k).classList.toggle('hide',k!==t));document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));if(t==='his')rHist();window.scrollTo(0,0)}
+
+/* peristiwa */
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
+$('jenis').onclick=e=>{const b=e.target.closest('.chip');if(b)setJenis(b.dataset.j)};
+$('pakai').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const id=+b.dataset.id;pakaiSet.has(id)?pakaiSet.delete(id):pakaiSet.add(id);rForm()};
+$('semua').onclick=()=>{pakaiSet=new Set(S.orang.map(o=>o.id));rForm()};
+$('mode').onchange=rCustom;$('mu').onchange=$('tmu').onchange=rForm;
+$('simpan').onclick=simpan;$('batal').onclick=()=>{resetForm();tab('his')};
+$('fOrang').onchange=rHist;
+$('tambah').onclick=()=>{const n=$('nama').value.trim();if(!n)return;if(S.orang.some(o=>o.nama.toLowerCase()===n.toLowerCase())){toast('Nama sudah ada');return}S.orang.push({id:S.nid++,nama:n});$('nama').value='';simpanS();pakaiSet.add(S.orang[S.orang.length-1].id);rAll()};
+$('nama').onkeydown=e=>{if(e.key==='Enter')$('tambah').click()};
+$('orang').onclick=e=>{const b=e.target.closest('[data-x]');if(!b)return;const id=+b.dataset.x;
+  if(S.cat.some(c=>c.byr===id||c.dari===id||c.ke===id||(c.bagi&&c.bagi[id]!==undefined))){toast('Tidak bisa dihapus: masih ada di catatan');return}
+  S.orang=S.orang.filter(o=>o.id!==id);pakaiSet.delete(id);simpanS();rAll()};
+$('kursDef').onchange=()=>{const v=num($('kursDef').value);if(v>0){S.kurs=v;simpanS();$('kurs').value=$('tkurs').value=v;rSum();toast('Kurs bawaan disimpan')}};
+$('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('[data-e]');
+  if(h){if(confirm('Hapus catatan ini?')){S.cat=S.cat.filter(c=>c.id!==+h.dataset.h);simpanS();rAll()}return}
+  if(ed){const c=S.cat.find(x=>x.id===+ed.dataset.e);if(!c)return;resetForm();editId=c.id;$('addTitle').textContent='Ubah catatan';$('batal').classList.remove('hide');setJenis(c.t);
+    if(c.t==='x'){$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=c.jml;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
+      const rata=Object.values(c.bagi).every(v=>Math.abs(v-c.jml/pakaiSet.size)<0.01);$('mode').value=rata?'rata':'custom';rCustom();if(!rata)document.querySelectorAll('#customBox input').forEach(i=>i.value=c.bagi[i.dataset.id]);}
+    else{$('tket').value=c.ket;$('ttgl').value=c.tgl;$('tjml').value=c.jml;$('tmu').value=c.mu;$('tkurs').value=c.kurs;rForm();$('tdari').value=c.dari;$('tke').value=c.ke}
+    tab('add')}};
+$('wa').onclick=()=>{const t=ringkasWA();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Ringkasan tersalin ✓')).catch(()=>prompt('Salin teks ini:',t))};
+$('bk').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='keuangan-jepang-'+hariIni()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+$('rs').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.orang)||!Array.isArray(x.cat))throw 0;if(confirm('Ganti semua data di HP ini dengan isi cadangan?')){S=Object.assign({orang:[],cat:[],kurs:110,nid:1},x);simpanS();resetForm();rAll();toast('Cadangan dipulihkan ✓')}}catch(_){toast('File cadangan tidak valid')}e.target.value=''};r.readAsText(f)};
+$('reset').onclick=()=>{if(confirm('Hapus SEMUA peserta dan catatan di HP ini? Tidak bisa dibatalkan.')){S={orang:[],cat:[],kurs:S.kurs,nid:1};simpanS();resetForm();rAll()}};
+resetForm();rAll();
+</script></body></html>
