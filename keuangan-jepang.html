@@ -1,78 +1,133 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Keuangan Trip Jepang</title>
-<meta name="theme-color" content="#072E23">
+<meta name="theme-color" content="#223A5E">
 <meta name="robots" content="noindex">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#E6F1E8;--card:rgba(255,255,255,.82);--border:rgba(7,46,35,.13);--t1:#072E23;--t2:#4B6B5E;--ac:#1D4D43;--pale:#CFE7D5;--plus:#15803d;--minus:#b91c1c;--in:#fff}
-@media(prefers-color-scheme:dark){:root{--bg:#051E20;--card:rgba(207,231,213,.07);--border:rgba(207,231,213,.15);--t1:#E3F0E6;--t2:#8FB2A1;--ac:#9CC4B0;--plus:#6ee7a0;--minus:#fca5a5;--in:rgba(207,231,213,.06)}}
+:root{--washi:#F4EFE2;--card:rgba(255,252,244,.88);--line:rgba(34,58,94,.20);--sumi:#1D2433;--mute:#5D6679;--ai:#223A5E;--shu:#D2453A;--saku:#F4C6CF;--matcha:#4F7F54;--kin:#B98B2E;--in:#fff;--plus:#3F7A48;--minus:#C23B2E;--sei:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='none' stroke='%23223A5E' stroke-width='1' opacity='.42'%3E%3Ccircle cx='20' cy='20' r='19'/%3E%3Ccircle cx='20' cy='20' r='14'/%3E%3Ccircle cx='20' cy='20' r='9'/%3E%3Ccircle cx='0' cy='10' r='19'/%3E%3Ccircle cx='0' cy='10' r='14'/%3E%3Ccircle cx='0' cy='10' r='9'/%3E%3Ccircle cx='40' cy='10' r='19'/%3E%3Ccircle cx='40' cy='10' r='14'/%3E%3Ccircle cx='40' cy='10' r='9'/%3E%3C/g%3E%3C/svg%3E")}
+@media(prefers-color-scheme:dark){:root{--washi:#10162A;--card:rgba(255,255,255,.055);--line:rgba(190,205,235,.20);--sumi:#EFE8DA;--mute:#A3AEC6;--ai:#9DB7E0;--shu:#EE6A5A;--saku:#E9AEBB;--matcha:#8CC490;--kin:#E2B95B;--in:rgba(255,255,255,.07);--plus:#8CD39A;--minus:#FF8E80}}
 *{box-sizing:border-box;margin:0}
-body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:linear-gradient(180deg,#F1F8F2,var(--bg) 45%,#D7E8D9) fixed;color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased}
-@media(prefers-color-scheme:dark){body{background:linear-gradient(180deg,#0B3A33,#051E20 55%,#03161A) fixed}}
-.top{position:sticky;top:0;z-index:10;background:#072E23;color:#EAF4EC;height:54px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
-.top b{font-size:15px;font-weight:800}.top a{color:#CFE7D5;text-decoration:none;font-weight:700;font-size:13px}
-main{max-width:760px;margin:0 auto;padding:16px 14px 70px}
-.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
-.tabs button{flex:1 0 auto;font:inherit;font-weight:700;font-size:13px;padding:9px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--t2);cursor:pointer;white-space:nowrap}
-.tabs button.on{background:#072E23;color:#CFE7D5;border-color:#072E23}
-@media(prefers-color-scheme:dark){.tabs button.on{background:#CFE7D5;color:#072E23}}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
-.card h2{font-size:15px;font-weight:800;margin-bottom:10px}
-.sub{font-size:12px;color:var(--t2);line-height:1.5}
-label{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);margin:10px 0 4px}
-input,select,textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--in);color:var(--t1);outline:none}
-input:focus,select:focus{border-color:var(--ac)}
+html{scroll-behavior:smooth}
+body{font-family:'Zen Maru Gothic','Noto Sans JP',system-ui,sans-serif;color:var(--sumi);background:var(--washi);min-height:100vh;-webkit-font-smoothing:antialiased;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 0%,rgba(244,198,207,.35),transparent 55%),radial-gradient(ellipse at 100% 30%,rgba(143,180,198,.25),transparent 50%),repeating-linear-gradient(0deg,rgba(0,0,0,.012) 0 2px,transparent 2px 4px)}
+@media(prefers-color-scheme:dark){body::before{background:radial-gradient(ellipse at 20% 0%,rgba(238,106,90,.12),transparent 55%),radial-gradient(ellipse at 100% 30%,rgba(90,120,190,.18),transparent 50%)}}
+h1,h2,.mincho{font-family:'Shippori Mincho','Hiragino Mincho ProN',serif}
+
+/* ---- hero: Fuji senja ---- */
+.hero{position:relative;overflow:hidden;color:#fff;padding:16px 18px 74px;background:linear-gradient(180deg,#3B4A63 0%,#7C7E93 38%,#D8A7A0 70%,#F2C89E 100%)}
+.hero .back{position:relative;z-index:3;color:#fff;text-decoration:none;font-weight:700;font-size:13px;opacity:.9}
+.hero .sun{position:absolute;right:26px;top:34px;width:62px;height:62px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FF8A6E,#E24B3C 70%);box-shadow:0 0 40px 10px rgba(255,140,110,.45)}
+.hero .ttl{position:relative;z-index:3;margin-top:14px}
+.hero .ttl small{display:block;letter-spacing:.3em;font-size:11px;font-weight:700;opacity:.9}
+.hero h1{font-size:30px;font-weight:800;line-height:1.15;margin-top:4px;text-shadow:0 2px 12px rgba(30,30,60,.35)}
+.hero h1 span{display:block;font-size:14px;font-weight:600;letter-spacing:.08em;margin-top:6px;font-family:'Zen Maru Gothic',sans-serif}
+.hero svg.fuji{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:92px;z-index:2}
+.hero .torii{position:absolute;right:14px;bottom:20px;width:62px;z-index:3;opacity:.95}
+.hero .big{position:absolute;right:8px;top:-8px;font-family:'Shippori Mincho',serif;font-size:128px;font-weight:800;line-height:1;color:rgba(255,255,255,.12);z-index:1;pointer-events:none}
+.sakura{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.sakura i{position:absolute;top:-24px;width:11px;height:9px;background:radial-gradient(ellipse at 30% 30%,#fff2f4,var(--saku) 70%);border-radius:80% 0 80% 0;opacity:.8;animation:fall linear infinite}
+@keyframes fall{0%{transform:translate3d(0,-5vh,0) rotate(0)}100%{transform:translate3d(60px,105vh,0) rotate(540deg)}}
+@media(prefers-reduced-motion:reduce){.sakura{display:none}}
+.sei{height:22px;background-image:var(--sei);background-size:40px 20px;border-bottom:1px solid var(--line);position:relative;z-index:2}
+
+main{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:14px 14px 70px}
+
+/* ---- tab ---- */
+.tabs{display:flex;gap:6px;margin:-4px 0 14px;overflow-x:auto;scrollbar-width:none}
+.tabs button{flex:1 0 auto;font:inherit;font-weight:700;font-size:12.5px;padding:7px 14px 8px;border-radius:12px 12px 4px 4px;border:1px solid var(--line);border-bottom:3px solid transparent;background:var(--card);color:var(--mute);cursor:pointer;white-space:nowrap;line-height:1.25}
+.tabs button .kj{display:block;font-family:'Shippori Mincho',serif;font-size:15px;font-weight:800;color:var(--ai)}
+.tabs button.on{color:var(--sumi);border-bottom-color:var(--shu);background:var(--in);box-shadow:0 3px 10px rgba(34,58,94,.12)}
+.tabs button.on .kj{color:var(--shu)}
+
+/* ---- kartu ---- */
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px 15px 14px;margin-bottom:14px;box-shadow:0 2px 0 rgba(34,58,94,.06)}
+.card::before{content:'';position:absolute;inset:3px;border:1px solid var(--line);border-radius:3px;pointer-events:none;opacity:.55}
+.card h2{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:800;margin-bottom:11px;position:relative}
+.card h2::before{content:'';width:5px;height:19px;background:var(--shu);border-radius:1px}
+.card h2 .kj{margin-left:auto;font-size:13px;font-weight:700;color:var(--ai);border:1.5px solid var(--shu);color:var(--shu);padding:1px 7px;border-radius:3px;transform:rotate(-3deg);letter-spacing:.1em}
+.sub{font-size:12px;color:var(--mute);line-height:1.55}
+label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ai);margin:11px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--in);color:var(--sumi);outline:none}
+input:focus,select:focus{border-color:var(--ai);box-shadow:0 0 0 3px rgba(34,58,94,.12)}
 .row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
-.btn{font:inherit;font-weight:800;font-size:14px;border:0;border-radius:12px;padding:11px 16px;cursor:pointer;background:#072E23;color:#CFE7D5}
-@media(prefers-color-scheme:dark){.btn{background:#CFE7D5;color:#072E23}}
-.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--t1)}
-.btn.small{padding:6px 10px;font-size:12px;border-radius:9px}
-.btn.full{width:100%;margin-top:12px}
+.btn{font:inherit;font-weight:800;font-size:14px;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;background:var(--ai);color:#fff;letter-spacing:.02em}
+@media(prefers-color-scheme:dark){.btn{background:var(--shu);color:#fff}}
+.btn.red{background:var(--shu);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--sumi)}
+.btn.small{padding:6px 10px;font-size:12px;border-radius:7px}
+.btn.full{width:100%;margin-top:13px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-.chip{font:inherit;font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--in);color:var(--t2);cursor:pointer}
-.chip.on{background:#1D4D43;color:#fff;border-color:#1D4D43}
-.person{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--border);font-weight:700}
+.chip{font:inherit;font-size:13px;font-weight:700;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--in);color:var(--mute);cursor:pointer}
+.chip.on{background:var(--ai);color:#fff;border-color:var(--ai)}
+@media(prefers-color-scheme:dark){.chip.on{background:var(--shu);border-color:var(--shu)}}
+.person{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-weight:700}
 .person:last-child{border-bottom:0}
+.person span::before{content:'🌸 ';font-size:13px}
+
+/* ---- total ---- */
+.tot{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tot div{flex:1 1 150px;position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--shu);border-radius:4px;padding:11px 14px}
+.tot b{display:block;font-family:'Shippori Mincho',serif;font-size:19px;font-weight:800}.tot span{font-size:11px;color:var(--mute)}
+.tot .ic{position:absolute;right:10px;top:8px;font-size:20px;opacity:.9}
+
+/* ---- tabel & saldo ---- */
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:right;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--t2);padding:6px 4px;border-bottom:1px solid var(--border)}
+th{text-align:right;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ai);padding:6px 4px;border-bottom:2px solid var(--line)}
 th:first-child,td:first-child{text-align:left}
-td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--border);font-variant-numeric:tabular-nums}
+td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-variant-numeric:tabular-nums}
 .pos{color:var(--plus);font-weight:800}.neg{color:var(--minus);font-weight:800}
-.who{padding:6px 0 4px;border-bottom:2px solid var(--border)}.who:last-child{border-bottom:0}.wh{display:flex;justify-content:space-between;font-size:14px;padding-top:6px}.wh span{font-weight:800}
-.settle{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--border);font-size:14px}
-.settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--t2);font-weight:600;font-size:11px}
-.hist{padding:11px 0;border-bottom:1px dashed var(--border)}
+
+/* ---- hasil akhir: gaya tiket kereta ---- */
+.who{position:relative;margin:0 0 12px;background:var(--in);border:1px solid var(--line);border-radius:6px;padding:0 12px 6px;overflow:hidden}
+.who::before,.who::after{content:'';position:absolute;top:34px;width:14px;height:14px;border-radius:50%;background:var(--washi);border:1px solid var(--line)}
+.who::before{left:-8px}.who::after{right:-8px}
+.wh{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:11px 0 10px;border-bottom:2px dashed var(--line);margin-bottom:2px}
+.wh b::before{content:'🚃 ';}
+.wh span{font-family:'Shippori Mincho',serif;font-weight:800;font-size:16px;color:var(--shu)}
+.settle{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--mute);font-weight:600;font-size:11px}
+.settle>div:first-child::before{content:'→ ';color:var(--shu);font-weight:800}
+
+.hist{padding:12px 0;border-bottom:1px dashed var(--line)}
 .hist:last-child{border-bottom:0}
 .hist .h1{display:flex;gap:8px;justify-content:space-between;font-weight:700;font-size:14px}
-.hist .h2{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.5}
+.hist .h2{font-size:12px;color:var(--mute);margin-top:3px;line-height:1.55}
 .hist .act{display:flex;gap:6px;margin-top:7px}
-.tot{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.tot div{flex:1 1 140px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 14px}
-.tot b{display:block;font-size:17px;font-weight:800}.tot span{font-size:11px;color:var(--t2)}
 .warn{font-size:12px;color:var(--minus);font-weight:700;margin-top:8px}
-.note{font-size:12px;color:var(--t2);line-height:1.55;border-left:3px solid var(--ac);padding:8px 12px;background:rgba(29,77,67,.07);border-radius:0 10px 10px 0;margin-bottom:12px}
-.empty{text-align:center;color:var(--t2);padding:22px 0;font-size:13px}
+.note{font-size:12px;color:var(--mute);line-height:1.55;border-left:3px solid var(--shu);padding:8px 12px;background:rgba(210,69,58,.06);border-radius:0 6px 6px 0;margin-bottom:12px}
+.empty{text-align:center;color:var(--mute);padding:24px 0;font-size:13px}
+.empty::before{content:'🗻';display:block;font-size:30px;margin-bottom:4px;opacity:.75}
 .hide{display:none}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#072E23;color:#E3F0E6;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ai);color:#fff;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;border-left:4px solid var(--shu)}
 .toast.on{opacity:1}
+.foot{position:relative;z-index:2;text-align:center;font-size:11px;color:var(--mute);padding:6px 0 26px;font-family:'Shippori Mincho',serif;letter-spacing:.2em}
 </style></head><body>
-<div class="top"><a href="./">←</a><b>🇯🇵 Keuangan Trip Jepang</b><span style="width:20px"></span></div>
+<div class="sakura" aria-hidden="true"><i style="left:6%;animation-duration:14s;animation-delay:-2s;transform:scale(1)"></i><i style="left:17%;animation-duration:19s;animation-delay:-9s;transform:scale(0.8)"></i><i style="left:29%;animation-duration:16s;animation-delay:-5s;transform:scale(1.1)"></i><i style="left:41%;animation-duration:21s;animation-delay:-13s;transform:scale(0.9)"></i><i style="left:53%;animation-duration:15s;animation-delay:-7s;transform:scale(1)"></i><i style="left:64%;animation-duration:18s;animation-delay:-1s;transform:scale(0.8)"></i><i style="left:75%;animation-duration:22s;animation-delay:-11s;transform:scale(1.1)"></i><i style="left:86%;animation-duration:17s;animation-delay:-4s;transform:scale(0.9)"></i><i style="left:94%;animation-duration:20s;animation-delay:-8s;transform:scale(1)"></i></div>
+<header class="hero">
+  <a class="back" href="./">← Kembali</a>
+  <div class="big" aria-hidden="true">旅</div>
+  <div class="sun" aria-hidden="true"></div>
+  <div class="ttl"><small>旅の精算 · TABI NO SEISAN</small><h1>Keuangan<br>Trip Jepang<span>🇯🇵 siapa pakai uang siapa</span></h1></div>
+  <svg class="torii" viewBox="0 0 64 56" aria-hidden="true"><g fill="#D2453A"><path d="M2 8c14 4 46 4 60 0v6C48 18 16 18 2 14z"/><rect x="6" y="18" width="52" height="5"/><rect x="12" y="14" width="6" height="42"/><rect x="46" y="14" width="6" height="42"/><rect x="29" y="14" width="6" height="9"/></g></svg>
+  <svg class="fuji" viewBox="0 0 400 92" preserveAspectRatio="none" aria-hidden="true"><path d="M0 92V74L70 62l54-8 34-30c8-6 14-8 22-8s14 2 22 8l34 30 54 8 56 12 54 8v26z" fill="#4A5878" opacity=".55"/><path d="M0 92V82c60-6 90-12 130-30l32-26c8-6 12-8 20-8s12 2 20 8l32 26c40 18 70 24 166 30v10z" fill="#2E3A57"/><path d="M142 36l20-16c8-6 12-8 20-8s12 2 20 8l20 16-10-4-9 7-9-6-9 7-9-6-9 6-8-7z" fill="#fff" opacity=".92"/></svg>
+</header>
+<div class="sei" aria-hidden="true"></div>
 <main>
 <div class="tabs" id="tabs">
-  <button data-t="sum" class="on">Ringkasan</button><button data-t="add">Catat</button><button data-t="his">Riwayat</button><button data-t="set">Peserta &amp; Kurs</button>
+  <button data-t="sum" class="on"><span class="kj">集計</span>Ringkasan</button><button data-t="add"><span class="kj">記録</span>Catat</button><button data-t="his"><span class="kj">履歴</span>Riwayat</button><button data-t="set"><span class="kj">設定</span>Peserta &amp; Kurs</button>
 </div>
 
 <!-- RINGKASAN -->
 <section id="v-sum">
   <div class="tot" id="tot"></div>
-  <div class="card"><h2>Saldo per orang</h2><div id="saldo"></div>
+  <div class="card"><h2>Saldo per orang<span class="kj">残高</span></h2><div id="saldo"></div>
     <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain. <b class="neg">Merah (−)</b> = lebih banyak memakai uang orang lain. Ini hanya total. Siapa membayar ke siapa mengikuti bagian <b>Hasil akhir per orang</b> di bawah.</p></div>
-  <div class="card"><h2>Hasil akhir per orang</h2><p class="sub" style="margin-bottom:6px">Sesuai siapa memakai uang siapa. Hanya saling dikurangkan antara dua orang yang sama, tidak dialihkan lewat orang lain.</p><div id="settle"></div></div>
-  <div class="card"><h2>Siapa pakai uang siapa</h2><p class="sub" style="margin-bottom:8px">Dari semua catatan, sebelum saling dikurangkan. Baris = yang memakai, kolom = pemilik uang.</p><div style="overflow-x:auto" id="matrix"></div></div>
-  <div class="card"><h2>Bagikan</h2>
+  <div class="card"><h2>Hasil akhir per orang<span class="kj">精算</span></h2><p class="sub" style="margin-bottom:6px">Sesuai siapa memakai uang siapa. Hanya saling dikurangkan antara dua orang yang sama, tidak dialihkan lewat orang lain.</p><div id="settle"></div></div>
+  <div class="card"><h2>Siapa pakai uang siapa<span class="kj">貸借</span></h2><p class="sub" style="margin-bottom:8px">Dari semua catatan, sebelum saling dikurangkan. Baris = yang memakai, kolom = pemilik uang.</p><div style="overflow-x:auto" id="matrix"></div></div>
+  <div class="card"><h2>Bagikan<span class="kj">共有</span></h2>
     <div class="row"><button class="btn" id="wa">Salin ringkasan WhatsApp</button><button class="btn ghost" id="bk">Unduh cadangan</button></div>
     <label>Pulihkan dari cadangan (file .json)</label><input type="file" id="rs" accept="application/json,.json">
     <button class="btn ghost full" id="reset" style="color:var(--minus)">Hapus semua catatan</button>
@@ -82,12 +137,12 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--border);font-
 <!-- CATAT -->
 <section id="v-add" class="hide">
   <div class="card">
-    <h2 id="addTitle">Catat baru</h2>
+    <h2><span id="addTitle">Catat baru</span><span class="kj">記録</span></h2>
     <div class="chips" id="jenis"><button class="chip on" data-j="x">Pengeluaran bersama</button><button class="chip" data-j="t">Transfer / pinjam</button></div>
 
     <div id="fx">
       <label>Keterangan</label><input id="ket" placeholder="mis. Ramen Ichiran, tiket Shinkansen">
-      <div class="row"><div><label>Tanggal</label><input type="date" id="tgl"></div><div><label>Kategori</label><select id="kat"><option>Makan</option><option>Transport</option><option>Belanja</option><option>Hotel</option><option>Tiket / wisata</option><option>Lain-lain</option></select></div></div>
+      <div class="row"><div><label>Tanggal</label><input type="date" id="tgl"></div><div><label>Kategori</label><select id="kat"><option value="Makan">🍜 Makan</option><option value="Transport">🚃 Transport</option><option value="Belanja">🛍️ Belanja</option><option value="Hotel">🏨 Hotel</option><option value="Tiket / wisata">⛩️ Tiket / wisata</option><option value="Lain-lain">🍡 Lain-lain</option></select></div></div>
       <div class="row"><div><label>Jumlah</label><input id="jml" inputmode="decimal" placeholder="0"></div><div><label>Mata uang</label><select id="mu"><option value="JPY">JPY (¥)</option><option value="IDR">IDR (Rp)</option></select></div></div>
       <div id="kursRow"><label>Kurs: 1 JPY = … Rp (untuk catatan ini)</label><input id="kurs" inputmode="decimal"></div>
       <label>Dibayar oleh (pakai uang siapa)</label><select id="byr"></select>
@@ -107,25 +162,26 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--border);font-
     </div>
 
     <div class="warn" id="err"></div>
-    <button class="btn full" id="simpan">Simpan</button>
+    <button class="btn red full" id="simpan">Simpan 保存</button>
     <button class="btn ghost full hide" id="batal">Batal edit</button>
   </div>
 </section>
 
 <!-- RIWAYAT -->
 <section id="v-his" class="hide">
-  <div class="card"><h2>Riwayat</h2><select id="fOrang"></select><div id="hist" style="margin-top:6px"></div></div>
+  <div class="card"><h2>Riwayat<span class="kj">履歴</span></h2><select id="fOrang"></select><div id="hist" style="margin-top:6px"></div></div>
 </section>
 
 <!-- PESERTA & KURS -->
 <section id="v-set" class="hide">
-  <div class="card"><h2>Peserta</h2>
+  <div class="card"><h2>Peserta<span class="kj">仲間</span></h2>
     <div class="row"><input id="nama" placeholder="Nama peserta"><button class="btn" id="tambah" style="flex:0 0 auto">Tambah</button></div>
     <div id="orang" style="margin-top:8px"></div></div>
-  <div class="card"><h2>Kurs bawaan</h2><label>1 JPY = … Rp</label><input id="kursDef" inputmode="decimal">
+  <div class="card"><h2>Kurs bawaan<span class="kj">為替</span></h2><label>1 JPY = … Rp</label><input id="kursDef" inputmode="decimal">
     <p class="sub" style="margin-top:6px">Dipakai sebagai isian awal saat mencatat dalam yen. Tiap catatan menyimpan kursnya sendiri, jadi mengubah kurs ini tidak mengubah catatan lama.</p></div>
 </section>
 </main>
+<div class="foot" aria-hidden="true">旅 · 楽しんでね 🌸</div>
 <div class="toast" id="toast"></div>
 <script>
 const KEY='keuangan-jepang-v1',$=id=>document.getElementById(id);
@@ -139,6 +195,7 @@ const num=v=>{v=String(v||'').trim().replace(/\s/g,'');if(!v)return NaN;if(/,/.t
 const nama=id=>{const o=S.orang.find(x=>x.id===id);return o?o.nama:'(dihapus)'};
 const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1800)};
 const hariIni=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const IKON={'Makan':'🍜','Transport':'🚃','Belanja':'🛍️','Hotel':'🏨','Tiket / wisata':'⛩️','Lain-lain':'🍡'};
 const idr=c=>c.mu==='JPY'?c.jml*c.kurs:c.jml;   // nilai catatan dalam rupiah
 
 /* ---------- hitung ---------- */
@@ -170,7 +227,7 @@ function pasangan(pair){
 /* ---------- tampilan ---------- */
 function rSum(){
   const H=hitung(),L=pasangan(H.pair);
-  $('tot').innerHTML=`<div><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama · ≈ ${fJPY(H.total)}</span></div><div><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
+  $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama · ≈ ${fJPY(H.total)}</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
   if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';$('matrix').innerHTML='';return}
   $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
     return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}<br><small class="sub">≈ ${fJPY(s)}</small></td></tr>`}).join('')+'</table>'+
@@ -237,7 +294,7 @@ function rHist(){
   if(f)L=L.filter(c=>c.t==='t'?(c.dari==f||c.ke==f):(c.byr==f||c.bagi[f]!==undefined));
   $('hist').innerHTML=L.length?L.map(c=>{const v=idr(c),asli=c.mu==='JPY'?'¥'+Math.round(c.jml).toLocaleString('en-US')+' × '+c.kurs+' = ':'';
     const d=c.t==='t'?`<b>${esc(nama(c.dari))}</b> → <b>${esc(nama(c.ke))}</b>`:`Dibayar <b>${esc(nama(c.byr))}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
-    return `<div class="hist"><div class="h1"><span>${c.t==='t'?'↔ ':''}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)}${c.t==='x'?' · '+esc(c.kat):''}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
+    return `<div class="hist"><div class="h1"><span>${c.t==='t'?'💴 ':(IKON[c.kat]||'🍡')+' '}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)}${c.t==='x'?' · '+esc(c.kat):''}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
 }
 function rOrang(){
   $('orang').innerHTML=S.orang.length?S.orang.map(o=>`<div class="person"><span>${esc(o.nama)}</span><button class="btn ghost small" data-x="${o.id}">Hapus</button></div>`).join(''):'<div class="empty">Belum ada peserta.</div>';
