@@ -169,9 +169,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
   <div class="card"><h2>Siapa pakai uang siapa<span class="kj">貸借</span></h2><p class="sub" style="margin-bottom:8px">Dari semua catatan, sebelum saling dikurangkan. Baris = yang memakai, kolom = pemilik uang.</p><div style="overflow-x:auto" id="matrix"></div></div>
   <div class="card"><h2>Bagikan<span class="kj">共有</span></h2>
     <div class="row"><button class="btn" id="wa">Salin ringkasan WhatsApp</button><button class="btn ghost" id="bk">Unduh cadangan</button></div>
-    <label>Pulihkan dari cadangan (file .json)</label><input type="file" id="rs" accept="application/json,.json">
-    <button class="btn ghost full" id="reset" style="color:var(--minus)">Hapus semua catatan</button>
-    <p class="sub" id="privNote" style="margin-top:10px">Data disimpan <b>hanya di HP ini</b>, tidak diunggah ke mana pun. Halaman ini bisa dibuka siapa saja, jadi angka di sini tidak terlihat orang lain. Untuk menyamakan data antar HP, unduh cadangan lalu pulihkan di HP lain.</p></div>
+    <p class="sub" id="privNote" style="margin-top:10px">Data trip tersimpan online dan dipakai bersama semua peserta. Siapa pun yang membuka aplikasi ini bisa melihat dan mengubah, jadi jangan dibagikan ke orang di luar peserta.</p></div>
 </section>
 
 <!-- CATAT -->
@@ -216,9 +214,9 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <!-- PESERTA & KURS -->
 <section id="v-set" class="hide">
   <div class="card"><h2>Peserta<span class="kj">仲間</span></h2>
-    <div class="row"><input id="nama" placeholder="Nama peserta"><button class="btn" id="tambah" style="flex:0 0 auto">Tambah</button></div>
-    <div id="orang" style="margin-top:8px"></div></div>
-  <div class="card"><h2>Simpan online<span class="kj">同期</span></h2><div id="sinkBox"></div></div>
+    <p class="sub" style="margin-bottom:6px">Peserta tetap (14 orang).</p>
+    <div id="orang"></div></div>
+  <div class="card"><h2>Sinkron<span class="kj">同期</span></h2><div id="sinkBox"></div></div>
   <div class="card"><h2>Kurs bawaan<span class="kj">為替</span></h2><label>1 JPY = … Rp</label><input id="kursDef" inputmode="decimal">
     <p class="sub" style="margin-top:6px">Dipakai sebagai isian awal saat mencatat dalam yen. Tiap catatan menyimpan kursnya sendiri, jadi mengubah kurs ini tidak mengubah catatan lama.</p></div>
 </section>
@@ -233,15 +231,10 @@ const IS_PHONE=/android|iphone|ipad|ipod|mobile/i.test(UA)||(navigator.maxTouchP
 const IS_IOS=/iphone|ipad|ipod/i.test(UA)||(navigator.maxTouchPoints>1&&/Macintosh/.test(UA));
 const STANDALONE=['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(m=>{try{return matchMedia('(display-mode: '+m+')').matches}catch(e){return false}})||navigator.standalone===true;
 const GATED=IS_PHONE&&!STANDALONE;
-// link ajakan (#trip= / #tempel=) disimpan dulu supaya tidak hilang saat pindah ke aplikasi yang sudah terpasang
-try{
-  if(GATED){if(/^#(trip|tempel)=/.test(location.hash))localStorage.setItem('kj-pending-hash',location.hash)}
-  else{const ph=localStorage.getItem('kj-pending-hash');if(ph){localStorage.removeItem('kj-pending-hash');if(!/^#(trip|tempel)=/.test(location.hash)){history.replaceState(null,'',location.pathname+location.search+ph)}}}
-}catch(e){}
 let deferredInstall=null;
 function gateRender(){
   const b=$('gateBody');if(!b)return;
-  let pend='';try{const h=localStorage.getItem('kj-pending-hash')||'';const m=/^#trip=([a-z0-9]+)/.exec(h);if(m)pend='<div class="kode">Kode trip kamu: <b>'+m[1]+'</b><br><span style="font-size:12px">Disimpan otomatis. Kalau setelah terpasang belum bergabung, tempel kode ini di tab Peserta &amp; Kurs, bagian Simpan online.</span></div>'}catch(e){}
+  const pend='';
   const inapp=/FBAN|FBAV|Instagram|Line\/|MicroMessenger|WhatsApp|Telegram|TikTok/i.test(UA);
   if(IS_IOS){
     const safari=/Safari/i.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA)&&!inapp;
@@ -266,7 +259,10 @@ try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.
 // Transfer/pinjam sudah tidak ada: catatan lama diubah jadi pengeluaran yang dibayar si pemberi untuk si penerima (hasil hitungan sama)
 function migrasiT(){let n=0;S.cat=S.cat.map(c=>{if(c.t!=='t')return c;n++;return{id:c.id,t:'x',tgl:c.tgl,ket:c.ket||'Titip',kat:'Lain-lain',jml:c.jml,mu:c.mu,kurs:c.kurs,byr:c.dari,bagi:{[c.ke]:c.jml}}});if(!S.lunas||typeof S.lunas!=='object')S.lunas={};return n}
 migrasiT();
-let ROOM='';   // kode trip online ('' = mode lokal)
+// Trip tetap bersama: satu dokumen Firestore untuk semua peserta (tanpa kode/link). Peserta sudah fix 14 orang.
+const TRIP_ID='jepang-2026-k7m3x9q2';
+const PRESET=['Imad','Lisa','Yudha','Vin','L','Bunda','Wafi','Panca','Ian','Bincha','Fatur','Vilo','Ray','Jose'];
+let ROOM=TRIP_ID;
 const newId=()=>Date.now()*1000+Math.floor(Math.random()*1000);   // id unik antar HP
 const simpanS=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(ROOM)pushDiff()};
 const fIDR=n=>(n<0?'−':'')+'Rp '+Math.round(Math.abs(n)).toLocaleString('id-ID');
@@ -382,7 +378,7 @@ function rHist(){
     return `<div class="hist"><div class="h1"><span>${(IKON[c.kat]||'🍡')+' '}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)} · ${esc(c.kat)}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
 }
 function rOrang(){
-  $('orang').innerHTML=S.orang.length?S.orang.map(o=>`<div class="person"><span>${esc(o.nama)}</span><button class="btn ghost small" data-x="${o.id}">Hapus</button></div>`).join(''):'<div class="empty">Belum ada peserta.</div>';
+  $('orang').innerHTML=S.orang.length?S.orang.map(o=>`<div class="person"><span>${esc(o.nama)}</span></div>`).join(''):'<div class="empty">Memuat peserta…</div>';
   $('fOrang').innerHTML='<option value="">Semua orang</option>'+S.orang.map(o=>`<option value="${o.id}">${esc(o.nama)}</option>`).join('');
   $('kursDef').value=S.kurs;
 }
@@ -397,11 +393,6 @@ $('semua').onclick=()=>{pakaiSet=new Set(S.orang.map(o=>o.id));rForm()};$('koson
 $('mode').onchange=rCustom;$('mu').onchange=rForm;
 $('simpan').onclick=simpan;$('batal').onclick=()=>{resetForm();tab('his')};
 $('fOrang').onchange=rHist;
-$('tambah').onclick=()=>{const n=$('nama').value.trim();if(!n)return;if(S.orang.some(o=>o.nama.toLowerCase()===n.toLowerCase())){toast('Nama sudah ada');return}S.orang.push({id:newId(),nama:n});$('nama').value='';simpanS();pakaiSet.add(S.orang[S.orang.length-1].id);rAll()};
-$('nama').onkeydown=e=>{if(e.key==='Enter')$('tambah').click()};
-$('orang').onclick=e=>{const b=e.target.closest('[data-x]');if(!b)return;const id=+b.dataset.x;
-  if(S.cat.some(c=>c.byr===id||c.dari===id||c.ke===id||(c.bagi&&c.bagi[id]!==undefined))){toast('Tidak bisa dihapus: masih ada di catatan');return}
-  S.orang=S.orang.filter(o=>o.id!==id);pakaiSet.delete(id);simpanS();rAll()};
 $('kursDef').onchange=()=>{const v=num($('kursDef').value);if(v>0){S.kurs=v;simpanS();$('kurs').value=v;rSum();toast('Kurs bawaan disimpan')}};
 $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('[data-e]');
   if(h){if(confirm('Hapus catatan ini?')){S.cat=S.cat.filter(c=>c.id!==+h.dataset.h);simpanS();rAll()}return}
@@ -411,8 +402,6 @@ $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('
     tab('add')}};
 $('wa').onclick=()=>{const t=ringkasWA();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Ringkasan tersalin ✓')).catch(()=>prompt('Salin teks ini:',t))};
 $('bk').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='keuangan-jepang-'+hariIni()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
-$('rs').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.orang)||!Array.isArray(x.cat))throw 0;if(confirm('Ganti semua data di HP ini dengan isi cadangan?')){S=Object.assign({orang:[],cat:[],kurs:110,nid:1,lunas:{}},x);migrasiT();simpanS();resetForm();rAll();toast('Cadangan dipulihkan ✓')}}catch(_){toast('File cadangan tidak valid')}e.target.value=''};r.readAsText(f)};
-$('reset').onclick=()=>{if(confirm('Hapus SEMUA peserta dan catatan di HP ini? Tidak bisa dibatalkan.')){S={orang:[],cat:[],kurs:S.kurs,nid:1,lunas:{}};simpanS();resetForm();rAll()}};
 /* ---------- tempel pesan titip beli yen ---------- */
 const HON=/^(ce|ko|kak|kk|mas|mba|mbak|pak|bu|ibu|bang|om|tante)\s+/i;
 const bersih=n=>{n=n.trim().replace(/\s+/g,' ');const m=n.replace(HON,'').trim();return m||n};
@@ -427,7 +416,7 @@ function tpBaca(){
   if(!t.rows.length){$('ppre').innerHTML='';$('psimpan').classList.add('hide');TP=null;$('err').textContent='Tidak ada baris yang terbaca. Format: "1. Nama: ¥10.000".';return}
   $('err').textContent='';
   if(t.kurs>0)$('pkurs').value=t.kurs;else if(!($('pkurs').value>0))$('pkurs').value=S.kurs;
-  const names=[...new Set(S.orang.map(o=>o.nama).concat(t.rows.map(r=>r.nama)))];
+  const names=S.orang.map(o=>o.nama);
   const cur=$('pbyr').value||TPbayar;
   $('pbyr').innerHTML='<option value="">Pilih yang membayar</option>'+names.map(n=>`<option>${esc(n)}</option>`).join('');
   const hit=names.find(n=>n.toLowerCase()===String(cur).toLowerCase());if(hit)$('pbyr').value=hit;
@@ -444,7 +433,9 @@ function tpPre(){
 function tpSimpan(){
   const byr=$('pbyr').value,kurs=num($('pkurs').value);
   if(!TP||!byr)return;if(!(kurs>0)){$('err').textContent='Isi kurs.';return}
-  const idOf=n=>{let o=S.orang.find(x=>x.nama.toLowerCase()===n.toLowerCase());if(!o){o={id:newId(),nama:n};S.orang.push(o)}return o.id};
+  const idOf=n=>{const o=S.orang.find(x=>x.nama.toLowerCase()===n.toLowerCase());return o?o.id:null};
+  const tak=TP.rows.filter(r=>r.nama.toLowerCase()!==byr.toLowerCase()&&idOf(r.nama)===null).map(r=>r.nama);
+  if(idOf(byr)===null||tak.length){$('err').textContent='Nama tidak ada di daftar peserta: '+[...(idOf(byr)===null?[byr]:[]),...tak].join(', ');return}
   const dari=idOf(byr),tgl=$('ptgl').value||hariIni();let baru=0,lewat=0;
   TP.rows.filter(r=>r.nama.toLowerCase()!==byr.toLowerCase()).forEach(r=>{
     const ke=idOf(r.nama);
@@ -456,20 +447,18 @@ function tpSimpan(){
 }
 $('pbaca').onclick=tpBaca;$('ptxt').oninput=()=>{TP=null;$('psimpan').classList.add('hide')};$('pbyr').onchange=tpPre;$('pkurs').oninput=tpPre;$('psimpan').onclick=tpSimpan;
 resetForm();rAll();
-/* ---------- sinkron online (Firestore, proyek mds-sulawesi) ----------
-   Koleksi keuangan_jepang/{kode}/ orang | cat | lunas. Kode trip acak = kunci (siapa punya link bisa baca/tulis). */
+/* ---------- simpan online (Firestore, proyek mds-sulawesi) ----------
+   Koleksi keuangan_jepang/TRIP_ID/ orang | cat | lunas. Selalu tersambung (tanpa pilihan lokal / kode). */
 const FB_CFG={apiKey:"AIzaSyCA8Q8athqYIsY3By5wPxcU97GjDBR6DAs",authDomain:"mds-sulawesi.firebaseapp.com",projectId:"mds-sulawesi",storageBucket:"mds-sulawesi.firebasestorage.app",messagingSenderId:"511949021685",appId:"1:511949021685:web:bc32007af0555449e7c0bc"};
-const ROOM_KEY='keuangan-jepang-room';
-try{ROOM=localStorage.getItem(ROOM_KEY)||''}catch(e){}
-let DB=null,UNS=[],R={room:{},orang:{},cat:{},lunas:{}},GOT={},SEED=false,ST='off',STMSG='';
+let DB=null,UNS=[],R={room:{},orang:{},cat:{},lunas:{}},GOT={},ST='off',STMSG='';
 const NAMA_KOLEKSI=['orang','cat','lunas'];
 function fsDb(){try{if(!window.firebase)return null;if(!firebase.apps.length)firebase.initializeApp(FB_CFG);return firebase.firestore()}catch(e){return null}}
 const roomRef=()=>DB.collection('keuangan_jepang').doc(ROOM);
 function setST(st,msg){ST=st;STMSG=msg||'';rSink()}
-function stopSync(){UNS.forEach(u=>{try{u()}catch(e){}});UNS=[];GOT={};ST='off';STMSG=''}
+function stopSync(){UNS.forEach(u=>{try{u()}catch(e){}});UNS=[];GOT={}}
 function startSync(){
-  stopSync();if(!ROOM){rSink();return}
-  DB=fsDb();if(!DB){setST('gagal','Firestore tidak termuat (cek koneksi internet).');return}
+  stopSync();
+  DB=fsDb();if(!DB){setST('gagal','Firestore tidak termuat (cek internet).');return}
   setST('konek');R={room:{},orang:{},cat:{},lunas:{}};
   const gagal=err=>setST('gagal',(err&&err.code)||'error');
   const rr=roomRef();
@@ -478,7 +467,11 @@ function startSync(){
 }
 function applyRemote(){
   if(!(GOT.room&&GOT.orang&&GOT.cat&&GOT.lunas))return;     // tunggu semua bagian tiba dulu
-  if(SEED){SEED=false;pushDiff();setST('ok');return}          // trip baru: kirim data HP ini sebagai isi awal
+  if(!Object.keys(R.orang).length&&!Object.keys(R.cat).length){
+    // trip online masih kosong: isi awal dari data di HP ini (kalau ada), kalau tidak ada pakai 14 peserta tetap
+    if(!S.orang.length)S.orang=PRESET.map((n,i)=>({id:i+1,nama:n}));
+    pushDiff();setST('ok');rAll();return;
+  }
   S.orang=Object.values(R.orang).sort((a,b)=>a.id-b.id);
   S.cat=Object.values(R.cat);
   S.lunas={};Object.keys(R.lunas).forEach(k=>{S.lunas[k]=(R.lunas[k]||{}).v||0});
@@ -498,63 +491,22 @@ function pushDiff(){
   const rr=roomRef(),roomChanged=!(R.room&&R.room.kurs===S.kurs);
   if(roomChanged){R.room=Object.assign({},R.room,{kurs:S.kurs,nama:'Trip Jepang'})}
   if(!ops.length&&!roomChanged)return;
-  const kirim=async()=>{
+  (async()=>{
     try{
       for(let i=0;i<ops.length;i+=400){const b=DB.batch();ops.slice(i,i+400).forEach(o=>{const ref=rr.collection(o.n).doc(o.k);o.del?b.delete(ref):b.set(ref,o.d)});await b.commit()}
       if(roomChanged)await rr.set({kurs:S.kurs,nama:'Trip Jepang',updatedAt:Date.now()},{merge:true});
     }catch(err){setST('gagal',(err&&err.code)||'error')}
-  };
-  kirim();
-}
-function kodeBaru(){const a='abcdefghjkmnpqrstuvwxyz23456789';let k='';const r=(window.crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(16)):Array.from({length:16},()=>Math.floor(Math.random()*256));for(let i=0;i<14;i++)k+=a[r[i]%a.length];return k}
-const linkTrip=()=>location.origin+location.pathname+'#trip='+ROOM;
-function aktifkanOnline(){
-  if(!window.firebase){toast('Firestore tidak termuat, cek internet');return}
-  ROOM=kodeBaru();try{localStorage.setItem(ROOM_KEY,ROOM)}catch(e){}
-  SEED=true;startSync();toast('Trip online dibuat ✓')
-}
-function gabungTrip(kode){
-  if(ROOM===kode){startSync();return}
-  const ada=S.orang.length||S.cat.length;
-  if(ada&&!confirm('Gabung ke trip online ini? Data yang ada di HP ini akan diganti dengan data trip.'))return;
-  S={orang:[],cat:[],kurs:S.kurs,nid:1,lunas:{}};ROOM=kode;try{localStorage.setItem(ROOM_KEY,ROOM)}catch(e){}
-  SEED=false;startSync();rAll();toast('Bergabung ke trip online ✓')
-}
-function putusOnline(){
-  if(!confirm('Putuskan dari trip online di HP ini? Data tetap ada di HP ini sebagai salinan, tapi tidak lagi ikut tersinkron.'))return;
-  stopSync();ROOM='';try{localStorage.removeItem(ROOM_KEY)}catch(e){}rSink();rAll();toast('Kembali ke mode lokal')
+  })();
 }
 function rSink(){
   const box=$('sinkBox'),stat=$('sinkStat');if(!box||!stat)return;
   stat.className='sinkstat'+(ST==='ok'?' ok':ST==='gagal'?' bad':'');
-  stat.textContent=!ROOM?'○ Mode lokal (data hanya di HP ini)':ST==='ok'?'● Online · tersinkron antar HP':ST==='konek'?'◌ Menyambung ke trip online…':'⚠ Gagal tersambung';
-  const pn=$('privNote');if(pn)pn.innerHTML=ROOM?'Data trip ini <b>tersimpan online</b> dan dipakai bersama semua yang memegang link trip. Siapa pun yang punya link bisa melihat dan mengubah, jadi <b>jangan dibagikan ke orang luar</b>.':'Data disimpan <b>hanya di HP ini</b>, tidak diunggah ke mana pun. Halaman ini bisa dibuka siapa saja, jadi angka di sini tidak terlihat orang lain. Untuk dipakai bersama, aktifkan <b>Simpan online</b> di tab Peserta &amp; Kurs.';
-  if(!ROOM){box.innerHTML='<p class="sub">Supaya semua peserta melihat data dan centang <b>sudah bayar</b> yang sama, aktifkan simpan online. Data HP ini dikirim jadi isi awal trip, lalu kamu membagikan link-nya ke teman.</p><button class="btn red full" id="sinkOn" type="button">Aktifkan simpan online</button><label style="margin-top:16px">Sudah punya link atau kode trip dari teman?</label><div class="linkbox"><input id="sinkKode" placeholder="tempel link atau kode trip"><button class="btn small" id="sinkGabung" type="button">Gabung</button></div>';return}
-  let h='';
-  if(ST==='ok')h+='<p class="sub"><b style="color:var(--plus)">Terhubung.</b> Perubahan di HP mana pun langsung muncul di HP lain.</p>';
-  else if(ST==='konek')h+='<p class="sub">Menyambung…</p>';
-  else h+='<p class="sub"><b style="color:var(--minus)">Gagal tersambung'+(STMSG?' ('+esc(STMSG)+')':'')+'.</b> '+(/permission/i.test(STMSG)?'Aturan Firestore untuk koleksi <b>keuangan_jepang</b> belum dipasang. Pasang dulu lewat <b>deploy-rules.js</b>, lalu coba lagi.':'Cek koneksi internet lalu coba lagi.')+'</p><button class="btn ghost small" id="sinkLagi" type="button" style="margin-top:6px">Coba lagi</button>';
-  h+='<label>Link ajak teman</label><div class="linkbox"><input id="sinkLink" readonly value="'+esc(linkTrip())+'"><button class="btn small" id="sinkSalin" type="button">Salin</button></div>';
-  h+='<p class="sub" style="margin-top:8px">Siapa pun yang membuka link ini bisa melihat dan mengubah data trip. Bagikan hanya ke peserta.</p>';
-  h+='<button class="btn ghost full" id="sinkPutus" type="button" style="color:var(--minus)">Putuskan di HP ini</button>';
-  box.innerHTML=h;
+  stat.textContent=ST==='ok'?'● Online · tersinkron antar HP':ST==='konek'?'◌ Menyambung…':ST==='gagal'?'⚠ Gagal tersambung':'';
+  if(ST==='ok')box.innerHTML='<p class="sub"><b style="color:var(--plus)">Terhubung.</b> Data dan centang sudah bayar dipakai bersama semua peserta. Perubahan di HP mana pun langsung muncul di HP lain.</p>';
+  else if(ST==='konek')box.innerHTML='<p class="sub">Menyambung…</p>';
+  else box.innerHTML='<p class="sub"><b style="color:var(--minus)">Gagal tersambung'+(STMSG?' ('+esc(STMSG)+')':'')+'.</b> '+(/permission/i.test(STMSG)?'Aturan Firestore untuk koleksi <b>keuangan_jepang</b> belum dipasang.':'Cek koneksi internet lalu coba lagi.')+'</p><button class="btn ghost small" id="sinkLagi" type="button" style="margin-top:6px">Coba lagi</button>';
 }
-document.addEventListener('click',e=>{
-  const t=e.target.closest('button');if(!t)return;
-  if(t.id==='sinkOn')aktifkanOnline();
-  else if(t.id==='sinkGabung'){const v=($('sinkKode').value||'').trim(),m=/(?:trip=)?([a-z0-9]{8,40})\s*$/i.exec(v);if(!m){toast('Kode trip tidak dikenali');return}gabungTrip(m[1].toLowerCase())}
-  else if(t.id==='sinkLagi')startSync();
-  else if(t.id==='sinkPutus')putusOnline();
-  else if(t.id==='sinkSalin'){const l=linkTrip();(navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(()=>toast('Link tersalin ✓')).catch(()=>prompt('Salin link ini:',l))}
-});
-// link ajakan: #trip=KODE (dibaca lalu dihapus dari alamat)
-(function(){const m=/^#trip=([a-z0-9]{8,40})/.exec(location.hash);if(!m||GATED)return;history.replaceState(null,'',location.pathname+location.search);window.__gabung=m[1]})();
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(t&&t.id==='sinkLagi')startSync()});
 rSink();
-if(GATED){gateTampil()}else if(window.__gabung)gabungTrip(window.__gabung);else if(ROOM)startSync();
-// link dengan data tertanam di bagian #, hanya dibaca di HP ini (tidak dikirim ke server), lalu dihapus dari alamat
-(function(){const m=/^#tempel=([\w-]+)/.exec(location.hash);if(!m||GATED)return;
-  try{const b=atob(m[1].replace(/-/g,'+').replace(/_/g,'/')),u=Uint8Array.from(b,c=>c.charCodeAt(0)),o=JSON.parse(new TextDecoder().decode(u));
-    history.replaceState(null,'',location.pathname+location.search);
-    resetForm();tab('add');setJenis('p');$('ptxt').value=o.t||'';TPbayar=o.b||'';if(o.k>0)$('pkurs').value=o.k;tpBaca();
-  }catch(e){}})();
+if(GATED){gateTampil()}else{startSync()}
 </script></body></html>
