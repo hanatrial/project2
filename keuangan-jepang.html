@@ -85,12 +85,24 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .who{position:relative;margin:0 0 12px;background:var(--in);border:1px solid var(--line);border-radius:6px;padding:0 12px 6px;overflow:hidden}
 .who::before,.who::after{content:'';position:absolute;top:34px;width:14px;height:14px;border-radius:50%;background:var(--washi);border:1px solid var(--line)}
 .who::before{left:-8px}.who::after{right:-8px}
-.wh{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:11px 0 10px;border-bottom:2px dashed var(--line);margin-bottom:2px}
+.wh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;padding:12px 0 11px;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+.wh::-webkit-details-marker{display:none}
 .wh b::before{content:'🚃 ';}
-.wh span{font-family:'Shippori Mincho',serif;font-weight:800;font-size:16px;color:var(--shu)}
+.wh::after{content:'▾';color:var(--mute);margin-left:4px;transition:transform .2s}
+.who[open]>.wh::after{transform:rotate(180deg)}
+.who[open]>.wh{border-bottom:2px dashed var(--line)}
+.bd{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.bd em{font-style:normal;font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.bd .b{background:rgba(210,69,58,.12);color:var(--minus)}.bd .t{background:rgba(63,122,72,.14);color:var(--plus)}.bd .ok{background:rgba(63,122,72,.14);color:var(--plus)}
+.det{padding:4px 0 6px}
+.dh{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ai);margin:10px 0 2px}
+.pay{display:flex;align-items:center;gap:10px;padding:10px 0;margin:0;border-bottom:1px dashed var(--line);font-size:14px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--sumi);cursor:pointer}
+.pay:last-child{border-bottom:0}
+.pay input{width:22px;height:22px;flex:none;accent-color:var(--plus);margin:0}
+.pay .pn{flex:1;min-width:0}.pay .amt{text-align:right;font-weight:800}.pay .amt small{display:block;color:var(--mute);font-weight:600;font-size:11px}
+.pay.done .pn,.pay.done .amt{opacity:.55;text-decoration:line-through}.pay.done .amt small{text-decoration:none;color:var(--plus);font-weight:800}
 .settle{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--mute);font-weight:600;font-size:11px}
-.settle>div:first-child::before{content:'→ ';color:var(--shu);font-weight:800}
 
 .hist{padding:12px 0;border-bottom:1px dashed var(--line)}
 .hist:last-child{border-bottom:0}
@@ -139,7 +151,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <section id="v-add" class="hide">
   <div class="card">
     <h2><span id="addTitle">Catat baru</span><span class="kj">記録</span></h2>
-    <div class="chips" id="jenis"><button class="chip on" data-j="x">Pengeluaran bersama</button><button class="chip" data-j="t">Transfer / pinjam</button><button class="chip" data-j="p">Tempel dari WhatsApp</button></div>
+    <div class="chips" id="jenis"><button class="chip on" data-j="x">Pengeluaran bersama</button><button class="chip" data-j="p">Tempel dari WhatsApp</button></div>
 
     <div id="fx">
       <label>Keterangan</label><input id="ket" placeholder="mis. Ramen Ichiran, tiket Shinkansen">
@@ -153,17 +165,9 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
       <div id="customBox" class="hide"></div>
     </div>
 
-    <div id="ft" class="hide">
-      <p class="note">Dipakai kalau satu orang meminjamkan atau menyerahkan uang ke orang lain, atau saat melunasi utang. Saldo orang yang memberi bertambah, yang menerima berkurang.</p>
-      <label>Keterangan (opsional)</label><input id="tket" placeholder="mis. Pinjam tunai, lunas ramen">
-      <div class="row"><div><label>Dari (memberi)</label><select id="tdari"></select></div><div><label>Ke (menerima)</label><select id="tke"></select></div></div>
-      <div class="row"><div><label>Jumlah</label><input id="tjml" inputmode="decimal" placeholder="0"></div><div><label>Mata uang</label><select id="tmu"><option value="JPY">JPY (¥)</option><option value="IDR">IDR (Rp)</option></select></div></div>
-      <div id="tkursRow"><label>Kurs: 1 JPY = … Rp</label><input id="tkurs" inputmode="decimal"></div>
-      <label>Tanggal</label><input type="date" id="ttgl">
-    </div>
 
     <div id="fp" class="hide">
-      <p class="note">Tempel pesan titip beli yen (baris seperti <b>1. Imad: ¥10.000 = Rp1.160.000</b>). Orang yang membayar dianggap meminjamkan yen ke yang lain, jadi tiap orang berutang ke dia sebesar pesanannya.</p>
+      <p class="note">Tempel pesan titip beli yen (baris seperti <b>1. Imad: ¥10.000 = Rp1.160.000</b>). Dicatat sebagai pengeluaran yang dibayar oleh orang di bawah ini untuk tiap orang, jadi tiap orang berutang ke dia sebesar pesanannya.</p>
       <label>Teks pesan</label><textarea id="ptxt" rows="8" placeholder="Titip beli Yen (kurs Rp116/yen):&#10;1. Imad: ¥10.000 = Rp1.160.000"></textarea>
       <div class="row"><div><label>Yang membayar</label><select id="pbyr"></select></div><div><label>Kurs: 1 JPY = … Rp</label><input id="pkurs" inputmode="decimal"></div></div>
       <label>Tanggal</label><input type="date" id="ptgl">
@@ -196,8 +200,11 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <script>
 const KEY='keuangan-jepang-v1',$=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let S={orang:[],cat:[],kurs:110,nid:1};
+let S={orang:[],cat:[],kurs:110,nid:1,lunas:{}};
 try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.orang)&&Array.isArray(x.cat))S=Object.assign(S,x)}catch(e){}
+// Transfer/pinjam sudah tidak ada: catatan lama diubah jadi pengeluaran yang dibayar si pemberi untuk si penerima (hasil hitungan sama)
+function migrasiT(){let n=0;S.cat=S.cat.map(c=>{if(c.t!=='t')return c;n++;return{id:c.id,t:'x',tgl:c.tgl,ket:c.ket||'Titip',kat:'Lain-lain',jml:c.jml,mu:c.mu,kurs:c.kurs,byr:c.dari,bagi:{[c.ke]:c.jml}}});if(!S.lunas||typeof S.lunas!=='object')S.lunas={};return n}
+migrasiT();
 const simpanS=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const fIDR=n=>(n<0?'−':'')+'Rp '+Math.round(Math.abs(n)).toLocaleString('id-ID');
 const fJPY=n=>(n<0?'−':'')+'¥'+Math.round(Math.abs(n)/S.kurs).toLocaleString('en-US');
@@ -210,18 +217,17 @@ const idr=c=>c.mu==='JPY'?c.jml*c.kurs:c.jml;   // nilai catatan dalam rupiah
 
 /* ---------- hitung ---------- */
 function hitung(){
-  const bayar={},pakai={},trf={},pair={};   // pair[pemakai][pemilik]
-  S.orang.forEach(o=>{bayar[o.id]=0;pakai[o.id]=0;trf[o.id]=0;pair[o.id]={}});
+  const bayar={},pakai={},pair={};   // pair[pemakai][pemilik]
+  S.orang.forEach(o=>{bayar[o.id]=0;pakai[o.id]=0;pair[o.id]={}});
   let total=0;
   S.cat.forEach(c=>{
     const v=idr(c);
-    if(c.t==='t'){if(!(c.dari in trf)||!(c.ke in trf))return;trf[c.dari]+=v;trf[c.ke]-=v;pair[c.ke][c.dari]=(pair[c.ke][c.dari]||0)+v;return}
     if(!(c.byr in bayar))return;
     bayar[c.byr]+=v;total+=v;
     Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(c.mu==='JPY'?c.kurs:1);pakai[id]+=sh;if(id!==c.byr)pair[id][c.byr]=(pair[id][c.byr]||0)+sh});
   });
-  const saldo={};S.orang.forEach(o=>{saldo[o.id]=bayar[o.id]-pakai[o.id]+trf[o.id]});
-  return{bayar,pakai,trf,pair,saldo,total};
+  const saldo={};S.orang.forEach(o=>{saldo[o.id]=bayar[o.id]-pakai[o.id]});
+  return{bayar,pakai,pair,saldo,total};
 }
 // Utang per pasangan: HANYA saling dikurangkan antara dua orang yang sama (A↔B). Tidak ada penyederhanaan lewat orang ketiga,
 // jadi hasilnya tetap sesuai siapa memakai uang siapa.
@@ -235,23 +241,35 @@ function pasangan(pair){
 }
 
 /* ---------- tampilan ---------- */
+const bukaOrang=new Set();
+const lunasDari=x=>(S.lunas||{})[x.dari+'>'+x.ke]||0;
+const sisaX=x=>Math.max(0,x.v-lunasDari(x));
+function rSettle(L){
+  if(!L.length){$('settle').innerHTML='<div class="empty">Semua sudah seimbang ✓</div>';return}
+  const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke;
+    return `<label class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}><span class="pn">${ket} <b>${esc(nama(lain))}</b></span><span class="amt">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+'<small>'+(rem<x.v-0.5?'sisa dari '+fIDR(x.v):'≈ '+fJPY(rem))+'</small>'}</span></label>`};
+  $('settle').innerHTML=S.orang.filter(o=>L.some(x=>x.dari===o.id||x.ke===o.id)).map(o=>{
+    const by=L.filter(x=>x.dari===o.id),tr=L.filter(x=>x.ke===o.id),sb=by.reduce((t,x)=>t+sisaX(x),0),st=tr.reduce((t,x)=>t+sisaX(x),0);
+    return `<details class="who" data-o="${o.id}"${bukaOrang.has(o.id)?' open':''}><summary class="wh"><b>${esc(o.nama)}</b><span class="bd">${sb>=1?'<em class="b">bayar '+fIDR(sb)+'</em>':''}${st>=1?'<em class="t">terima '+fIDR(st)+'</em>':''}${sb<1&&st<1?'<em class="ok">lunas ✓</em>':''}</span></summary><div class="det">`+
+      (by.length?'<div class="dh">Bayar ke siapa</div>'+by.map(x=>baris(x,x.ke,'ke')).join(''):'')+(tr.length?'<div class="dh">Terima dari siapa</div>'+tr.map(x=>baris(x,x.dari,'dari')).join(''):'')+'</div></details>'}).join('');
+}
+$('settle').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.o){const id=+d.dataset.o;d.open?bukaOrang.add(id):bukaOrang.delete(id)}},true);
+$('settle').addEventListener('change',e=>{const c=e.target.closest('input[data-k]');if(!c)return;if(!S.lunas)S.lunas={};if(c.checked)S.lunas[c.dataset.k]=+c.dataset.v;else delete S.lunas[c.dataset.k];simpanS();rSum()});
 function rSum(){
   const H=hitung(),L=pasangan(H.pair);
   $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama · ≈ ${fJPY(H.total)}</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
   if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';$('matrix').innerHTML='';return}
   $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
-    return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}<br><small class="sub">≈ ${fJPY(s)}</small></td></tr>`}).join('')+'</table>'+
-    (H.trf&&Object.values(H.trf).some(v=>Math.abs(v)>0.5)?'<p class="sub" style="margin-top:8px">Saldo sudah memperhitungkan transfer / pinjaman yang dicatat.</p>':'');
-  $('settle').innerHTML=L.length?S.orang.filter(o=>L.some(x=>x.dari===o.id)).map(o=>{const mine=L.filter(x=>x.dari===o.id),tot=mine.reduce((t,x)=>t+x.v,0);
-    return `<div class="who"><div class="wh"><b>${esc(o.nama)}</b> harus bayar <span>${fIDR(tot)}</span></div>`+mine.map(x=>`<div class="settle"><div>ke <b>${esc(nama(x.ke))}</b></div><div class="amt">${fIDR(x.v)}<small>≈ ${fJPY(x.v)}</small></div></div>`).join('')+'</div>'}).join(''):'<div class="empty">Semua sudah seimbang ✓</div>';
+    return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}<br><small class="sub">≈ ${fJPY(s)}</small></td></tr>`}).join('')+'</table>';
+  rSettle(L);
   const ids=S.orang.map(o=>o.id);
   $('matrix').innerHTML='<table><tr><th>Memakai ↓ / uang milik →</th>'+ids.map(i=>`<th>${esc(nama(i))}</th>`).join('')+'</tr>'+ids.map(a=>`<tr><td><b>${esc(nama(a))}</b></td>`+ids.map(b=>`<td>${a===b?'–':(H.pair[a][b]?fIDR(H.pair[a][b]):'')}</td>`).join('')+'</tr>').join('')+'</table>';
 }
 function ringkasWA(){
-  const H=hitung(),L=pasangan(H.pair);
+  const H=hitung(),L=pasangan(H.pair).map(x=>Object.assign({},x,{v:sisaX(x)})).filter(x=>x.v>=1);
   let t='*KEUANGAN TRIP JEPANG*\nTotal pengeluaran bersama: '+fIDR(H.total)+' (≈ '+fJPY(H.total)+')\nKurs bawaan: 1 JPY = Rp '+S.kurs+'\n\n*Saldo*\n';
   S.orang.forEach(o=>{const s=H.saldo[o.id];t+='• '+o.nama+': bayar '+fIDR(H.bayar[o.id])+', pakai '+fIDR(H.pakai[o.id])+' → '+(Math.abs(s)<0.5?'lunas':(s>0?'berhak terima ':'harus bayar ')+fIDR(Math.abs(s)))+'\n'});
-  t+='\n*Hasil akhir per orang*\n'+(L.length?S.orang.filter(o=>L.some(x=>x.dari===o.id)).map(o=>{const m=L.filter(x=>x.dari===o.id);return '*'+o.nama+'* harus bayar '+fIDR(m.reduce((a,x)=>a+x.v,0))+'\n'+m.map(x=>'  • ke '+nama(x.ke)+': '+fIDR(x.v)+' (≈ '+fJPY(x.v)+')').join('\n')}).join('\n'):'Semua sudah seimbang ✓');
+  t+='\n*Yang belum dibayar*\n'+(L.length?S.orang.filter(o=>L.some(x=>x.dari===o.id)).map(o=>{const m=L.filter(x=>x.dari===o.id);return '*'+o.nama+'* harus bayar '+fIDR(m.reduce((a,x)=>a+x.v,0))+'\n'+m.map(x=>'  • ke '+nama(x.ke)+': '+fIDR(x.v)+' (≈ '+fJPY(x.v)+')').join('\n')}).join('\n'):'Semua sudah seimbang ✓');
   return t;
 }
 
@@ -260,24 +278,24 @@ let editId=null,pakaiSet=new Set(),jenis='x';
 function opsOrang(sel,val){sel.innerHTML=S.orang.map(o=>`<option value="${o.id}">${esc(o.nama)}</option>`).join('');if(val!=null)sel.value=val}
 function rForm(){
   const has=v=>S.orang.some(o=>String(o.id)===String(v));
-  const kb=$('byr').value,kd=$('tdari').value,kk=$('tke').value;   // pertahankan pilihan saat form digambar ulang (mis. setelah ganti mata uang)
-  opsOrang($('byr'),has(kb)?kb:(S.orang[0]&&S.orang[0].id));opsOrang($('tdari'),has(kd)?kd:(S.orang[0]&&S.orang[0].id));opsOrang($('tke'),has(kk)?kk:(S.orang[1]?S.orang[1].id:undefined));
+  const kb=$('byr').value;   // pertahankan pilihan saat form digambar ulang (mis. setelah ganti mata uang)
+  opsOrang($('byr'),has(kb)?kb:(S.orang[0]&&S.orang[0].id));
   $('pakai').innerHTML=S.orang.map(o=>`<button type="button" class="chip${pakaiSet.has(o.id)?' on':''}" data-id="${o.id}" aria-pressed="${pakaiSet.has(o.id)}">${pakaiSet.has(o.id)?'✓ ':''}${esc(o.nama)}</button>`).join('')||'<span class="sub">Belum ada peserta.</span>';
   rCustom();
-  $('kursRow').classList.toggle('hide',$('mu').value!=='JPY');$('tkursRow').classList.toggle('hide',$('tmu').value!=='JPY');
+  $('kursRow').classList.toggle('hide',$('mu').value!=='JPY');
 }
 function rCustom(){
   const m=$('mode').value==='custom';$('customBox').classList.toggle('hide',!m);if(!m)return;
   const keep={};document.querySelectorAll('#customBox input').forEach(i=>keep[i.dataset.id]=i.value);
   $('customBox').innerHTML=[...pakaiSet].map(id=>`<label>${esc(nama(id))}</label><input inputmode="decimal" data-id="${id}" value="${keep[id]||''}" placeholder="nominal dalam mata uang di atas">`).join('')||'<p class="sub">Pilih dulu siapa yang memakai.</p>';
 }
-function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('ft').classList.toggle('hide',j!=='t');$('fp').classList.toggle('hide',j!=='p');$('simpan').classList.toggle('hide',j==='p');if(j==='p'&&!$('ptgl').value)$('ptgl').value=hariIni()}
-function resetForm(){editId=null;['ket','jml','tket','tjml'].forEach(i=>$(i).value='');$('tgl').value=$('ttgl').value=hariIni();$('kurs').value=$('tkurs').value=S.kurs;$('mu').value=$('tmu').value='JPY';$('mode').value='rata';
+function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('fp').classList.toggle('hide',j!=='p');$('simpan').classList.toggle('hide',j==='p');if(j==='p'&&!$('ptgl').value)$('ptgl').value=hariIni()}
+function resetForm(){editId=null;['ket','jml'].forEach(i=>$(i).value='');$('tgl').value=hariIni();$('kurs').value=S.kurs;$('mu').value='JPY';$('mode').value='rata';
   pakaiSet=new Set(S.orang.map(o=>o.id));$('addTitle').textContent='Catat baru';$('batal').classList.add('hide');$('err').textContent='';setJenis('x');rForm()}
 function simpan(){
   const err=m=>{$('err').textContent=m;return false};
   if(S.orang.length<2)return err('Tambah minimal 2 peserta dulu di tab Peserta & Kurs.');
-  if(jenis==='x'){
+  {
     const jml=num($('jml').value),kurs=num($('kurs').value),mu=$('mu').value;
     if(!(jml>0))return err('Isi jumlah dengan angka lebih dari 0.');
     if(mu==='JPY'&&!(kurs>0))return err('Isi kurs.');
@@ -289,22 +307,16 @@ function simpan(){
       if(Math.abs(sum-jml)>0.5)return err('Jumlah nominal ('+Math.round(sum).toLocaleString('id-ID')+') belum sama dengan total ('+Math.round(jml).toLocaleString('id-ID')+').')}
     const c={id:editId||S.nid++,t:'x',tgl:$('tgl').value||hariIni(),ket:$('ket').value.trim()||'(tanpa keterangan)',kat:$('kat').value,jml,mu,kurs:mu==='JPY'?kurs:1,byr:+$('byr').value,bagi};
     put(c);
-  }else{
-    const jml=num($('tjml').value),mu=$('tmu').value,kurs=num($('tkurs').value);
-    if(!(jml>0))return err('Isi jumlah dengan angka lebih dari 0.');
-    if(mu==='JPY'&&!(kurs>0))return err('Isi kurs.');
-    if($('tdari').value===$('tke').value)return err('Pemberi dan penerima tidak boleh orang yang sama.');
-    put({id:editId||S.nid++,t:'t',tgl:$('ttgl').value||hariIni(),ket:$('tket').value.trim()||'Transfer',jml,mu,kurs:mu==='JPY'?kurs:1,dari:+$('tdari').value,ke:+$('tke').value});
   }
   $('err').textContent='';simpanS();toast(editId?'Perubahan disimpan ✓':'Tersimpan ✓');resetForm();rAll();tab('sum');
 }
 function put(c){const i=S.cat.findIndex(x=>x.id===c.id);if(i>=0)S.cat[i]=c;else S.cat.push(c)}
 function rHist(){
   const f=$('fOrang').value;let L=S.cat.slice().sort((a,b)=>String(b.tgl).localeCompare(String(a.tgl))||b.id-a.id);
-  if(f)L=L.filter(c=>c.t==='t'?(c.dari==f||c.ke==f):(c.byr==f||c.bagi[f]!==undefined));
+  if(f)L=L.filter(c=>c.byr==f||c.bagi[f]!==undefined);
   $('hist').innerHTML=L.length?L.map(c=>{const v=idr(c),asli=c.mu==='JPY'?'¥'+Math.round(c.jml).toLocaleString('en-US')+' × '+c.kurs+' = ':'';
-    const d=c.t==='t'?`<b>${esc(nama(c.dari))}</b> → <b>${esc(nama(c.ke))}</b>`:`Dibayar <b>${esc(nama(c.byr))}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
-    return `<div class="hist"><div class="h1"><span>${c.t==='t'?'💴 ':(IKON[c.kat]||'🍡')+' '}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)}${c.t==='x'?' · '+esc(c.kat):''}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
+    const d=`Dibayar <b>${esc(nama(c.byr))}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
+    return `<div class="hist"><div class="h1"><span>${(IKON[c.kat]||'🍡')+' '}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)} · ${esc(c.kat)}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
 }
 function rOrang(){
   $('orang').innerHTML=S.orang.length?S.orang.map(o=>`<div class="person"><span>${esc(o.nama)}</span><button class="btn ghost small" data-x="${o.id}">Hapus</button></div>`).join(''):'<div class="empty">Belum ada peserta.</div>';
@@ -319,7 +331,7 @@ $('tabs').onclick=e=>{const b=e.target.closest('button');if(b)tab(b.dataset.t)};
 $('jenis').onclick=e=>{const b=e.target.closest('.chip');if(b)setJenis(b.dataset.j)};
 $('pakai').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const id=+b.dataset.id;pakaiSet.has(id)?pakaiSet.delete(id):pakaiSet.add(id);rForm()};
 $('semua').onclick=()=>{pakaiSet=new Set(S.orang.map(o=>o.id));rForm()};$('kosong').onclick=()=>{pakaiSet=new Set();rForm()};
-$('mode').onchange=rCustom;$('mu').onchange=$('tmu').onchange=rForm;
+$('mode').onchange=rCustom;$('mu').onchange=rForm;
 $('simpan').onclick=simpan;$('batal').onclick=()=>{resetForm();tab('his')};
 $('fOrang').onchange=rHist;
 $('tambah').onclick=()=>{const n=$('nama').value.trim();if(!n)return;if(S.orang.some(o=>o.nama.toLowerCase()===n.toLowerCase())){toast('Nama sudah ada');return}S.orang.push({id:S.nid++,nama:n});$('nama').value='';simpanS();pakaiSet.add(S.orang[S.orang.length-1].id);rAll()};
@@ -327,18 +339,17 @@ $('nama').onkeydown=e=>{if(e.key==='Enter')$('tambah').click()};
 $('orang').onclick=e=>{const b=e.target.closest('[data-x]');if(!b)return;const id=+b.dataset.x;
   if(S.cat.some(c=>c.byr===id||c.dari===id||c.ke===id||(c.bagi&&c.bagi[id]!==undefined))){toast('Tidak bisa dihapus: masih ada di catatan');return}
   S.orang=S.orang.filter(o=>o.id!==id);pakaiSet.delete(id);simpanS();rAll()};
-$('kursDef').onchange=()=>{const v=num($('kursDef').value);if(v>0){S.kurs=v;simpanS();$('kurs').value=$('tkurs').value=v;rSum();toast('Kurs bawaan disimpan')}};
+$('kursDef').onchange=()=>{const v=num($('kursDef').value);if(v>0){S.kurs=v;simpanS();$('kurs').value=v;rSum();toast('Kurs bawaan disimpan')}};
 $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('[data-e]');
   if(h){if(confirm('Hapus catatan ini?')){S.cat=S.cat.filter(c=>c.id!==+h.dataset.h);simpanS();rAll()}return}
-  if(ed){const c=S.cat.find(x=>x.id===+ed.dataset.e);if(!c)return;resetForm();editId=c.id;$('addTitle').textContent='Ubah catatan';$('batal').classList.remove('hide');setJenis(c.t);
-    if(c.t==='x'){$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=c.jml;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
+  if(ed){const c=S.cat.find(x=>x.id===+ed.dataset.e);if(!c)return;resetForm();editId=c.id;$('addTitle').textContent='Ubah catatan';$('batal').classList.remove('hide');setJenis('x');
+    {$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=c.jml;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
       const rata=Object.values(c.bagi).every(v=>Math.abs(v-c.jml/pakaiSet.size)<0.01);$('mode').value=rata?'rata':'custom';rCustom();if(!rata)document.querySelectorAll('#customBox input').forEach(i=>i.value=c.bagi[i.dataset.id]);}
-    else{$('tket').value=c.ket;$('ttgl').value=c.tgl;$('tjml').value=c.jml;$('tmu').value=c.mu;$('tkurs').value=c.kurs;rForm();$('tdari').value=c.dari;$('tke').value=c.ke}
     tab('add')}};
 $('wa').onclick=()=>{const t=ringkasWA();(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Ringkasan tersalin ✓')).catch(()=>prompt('Salin teks ini:',t))};
 $('bk').onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='keuangan-jepang-'+hariIni()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
-$('rs').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.orang)||!Array.isArray(x.cat))throw 0;if(confirm('Ganti semua data di HP ini dengan isi cadangan?')){S=Object.assign({orang:[],cat:[],kurs:110,nid:1},x);simpanS();resetForm();rAll();toast('Cadangan dipulihkan ✓')}}catch(_){toast('File cadangan tidak valid')}e.target.value=''};r.readAsText(f)};
-$('reset').onclick=()=>{if(confirm('Hapus SEMUA peserta dan catatan di HP ini? Tidak bisa dibatalkan.')){S={orang:[],cat:[],kurs:S.kurs,nid:1};simpanS();resetForm();rAll()}};
+$('rs').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.orang)||!Array.isArray(x.cat))throw 0;if(confirm('Ganti semua data di HP ini dengan isi cadangan?')){S=Object.assign({orang:[],cat:[],kurs:110,nid:1,lunas:{}},x);migrasiT();simpanS();resetForm();rAll();toast('Cadangan dipulihkan ✓')}}catch(_){toast('File cadangan tidak valid')}e.target.value=''};r.readAsText(f)};
+$('reset').onclick=()=>{if(confirm('Hapus SEMUA peserta dan catatan di HP ini? Tidak bisa dibatalkan.')){S={orang:[],cat:[],kurs:S.kurs,nid:1,lunas:{}};simpanS();resetForm();rAll()}};
 /* ---------- tempel pesan titip beli yen ---------- */
 const HON=/^(ce|ko|kak|kk|mas|mba|mbak|pak|bu|ibu|bang|om|tante)\s+/i;
 const bersih=n=>{n=n.trim().replace(/\s+/g,' ');const m=n.replace(HON,'').trim();return m||n};
@@ -374,8 +385,8 @@ function tpSimpan(){
   const dari=idOf(byr),tgl=$('ptgl').value||hariIni();let baru=0,lewat=0;
   TP.rows.filter(r=>r.nama.toLowerCase()!==byr.toLowerCase()).forEach(r=>{
     const ke=idOf(r.nama);
-    if(S.cat.some(c=>c.t==='t'&&c.dari===dari&&c.ke===ke&&c.jml===r.yen&&c.mu==='JPY'&&c.kurs===kurs&&c.tgl===tgl&&c.ket==='Titip beli yen')){lewat++;return}
-    S.cat.push({id:S.nid++,t:'t',tgl,ket:'Titip beli yen',jml:r.yen,mu:'JPY',kurs,dari,ke});baru++});
+    if(S.cat.some(c=>c.ket==='Titip beli yen'&&c.byr===dari&&c.mu==='JPY'&&c.kurs===kurs&&c.tgl===tgl&&c.jml===r.yen&&Object.keys(c.bagi).length===1&&c.bagi[ke]!==undefined)){lewat++;return}
+    S.cat.push({id:S.nid++,t:'x',tgl,ket:'Titip beli yen',kat:'Lain-lain',jml:r.yen,mu:'JPY',kurs,byr:dari,bagi:{[ke]:r.yen}});baru++});
   S.kurs=kurs;   // kurs di pesan jadi kurs bawaan, supaya perkiraan ¥ di hasil akhir cocok
   simpanS();toast(baru+' catatan tersimpan'+(lewat?' · '+lewat+' sudah ada, dilewati':'')+' ✓');
   $('ptxt').value='';TP=null;$('ppre').innerHTML='';$('psimpan').classList.add('hide');resetForm();rAll();tab('sum');
