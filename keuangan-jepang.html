@@ -291,7 +291,7 @@ document.addEventListener('click',async e=>{const g=e.target.closest('#gateInsta
 });
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const MATA={JPY:{s:'¥',nama:'Yen Jepang',def:116},SGD:{s:'S$',nama:'Dolar Singapura',def:12500},VND:{s:'₫',nama:'Dong Vietnam',def:0.63},MYR:{s:'RM',nama:'Ringgit Malaysia (Kuala Lumpur)',def:3800}};
+const MATA={JPY:{s:'¥',nama:'Yen Jepang',def:116},SGD:{s:'S$',nama:'Dolar Singapura',def:14200},VND:{s:'₫',nama:'Dong Vietnam',def:0.725},MYR:{s:'RM',nama:'Ringgit Malaysia (Kuala Lumpur)',def:4500}};
 const asing=m=>m&&m!=='IDR';
 const fK=k=>Number(k).toLocaleString('id-ID',{maximumFractionDigits:4});
 let S={orang:[],cat:[],kurs:110,nid:1,lunas:{},kurss:{}};
