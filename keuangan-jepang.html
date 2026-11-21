@@ -3,7 +3,9 @@
 <title>Keuangan Trip Jepang</title>
 <meta name="theme-color" content="#223A5E">
 <meta name="robots" content="noindex">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="manifest" href="manifest-keuangan.webmanifest">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Trip Jepang"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icons/jepang-192.png"><link rel="apple-touch-icon" href="icons/jepang-apple-touch.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -120,9 +122,29 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ai);color:#fff;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;border-left:4px solid var(--shu)}
 .toast.on{opacity:1}
 .sinkstat{font-size:11.5px;font-weight:700;color:var(--mute);margin:-2px 2px 8px;text-align:right}.sinkstat.ok{color:var(--plus)}.sinkstat.bad{color:var(--minus)}
+.gated main,.gated .tabs,.gated #sinkStat,.gated .foot,.gated .sakura{display:none!important}
+.gate{position:fixed;inset:0;z-index:9999;overflow-y:auto;display:none;background:linear-gradient(180deg,#3B4A63 0%,#7C7E93 35%,#D8A7A0 70%,#F2C89E 100%);color:#fff}
+.gated .gate{display:block}
+.gate .in{max-width:460px;margin:0 auto;padding:34px 22px 40px;text-align:center}
+.gate .logo{width:92px;height:92px;border-radius:22px;box-shadow:0 10px 30px rgba(20,25,50,.4)}
+.gate h1{font-family:'Shippori Mincho',serif;font-size:27px;font-weight:800;line-height:1.25;margin:16px 0 8px;text-shadow:0 2px 12px rgba(30,30,60,.35)}
+.gate p{font-size:14px;line-height:1.6;margin:0 0 12px}
+.gate .wajib{display:inline-block;background:#D2453A;color:#fff;font-weight:800;font-size:11px;letter-spacing:.16em;padding:4px 14px;border-radius:999px}
+.gate .big{width:100%;margin-top:6px;background:#fff;color:#223A5E;border:0;border-radius:12px;padding:15px;font:inherit;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 8px 22px rgba(20,25,50,.35)}
+.gate .steps{text-align:left;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:14px;padding:12px 16px 12px 34px;font-size:14px;line-height:1.7;margin:12px 0}
+.gate .steps li{margin:3px 0}
+.gate .kode{background:rgba(0,0,0,.22);border-radius:10px;padding:10px 12px;font-size:13px;word-break:break-all;margin:12px 0}
+.gate .ok{background:rgba(255,255,255,.92);color:#2F6B3A;border-radius:12px;padding:14px;font-weight:800;margin-top:10px}
 .foot{position:relative;z-index:2;text-align:center;font-size:11px;color:var(--mute);padding:6px 0 26px;font-family:'Shippori Mincho',serif;letter-spacing:.2em}
 </style></head><body>
 <div class="sakura" aria-hidden="true"><i style="left:6%;animation-duration:14s;animation-delay:-2s;transform:scale(1)"></i><i style="left:17%;animation-duration:19s;animation-delay:-9s;transform:scale(0.8)"></i><i style="left:29%;animation-duration:16s;animation-delay:-5s;transform:scale(1.1)"></i><i style="left:41%;animation-duration:21s;animation-delay:-13s;transform:scale(0.9)"></i><i style="left:53%;animation-duration:15s;animation-delay:-7s;transform:scale(1)"></i><i style="left:64%;animation-duration:18s;animation-delay:-1s;transform:scale(0.8)"></i><i style="left:75%;animation-duration:22s;animation-delay:-11s;transform:scale(1.1)"></i><i style="left:86%;animation-duration:17s;animation-delay:-4s;transform:scale(0.9)"></i><i style="left:94%;animation-duration:20s;animation-delay:-8s;transform:scale(1)"></i></div>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-label="Pasang aplikasi dulu"><div class="in">
+  <img class="logo" src="icons/jepang-192.png" alt="">
+  <div style="margin-top:14px"><span class="wajib">WAJIB</span></div>
+  <h1>Pasang dulu sebagai aplikasi</h1>
+  <p>Halaman keuangan trip ini <b>tidak boleh dipakai lewat browser HP</b>. Pasang sebagai aplikasi (PWA) dulu, lalu buka lewat <b>ikon di layar utama</b>.</p>
+  <div id="gateBody"></div>
+</div></div>
 <header class="hero">
   <a class="back" href="./">← Kembali</a>
   <div class="big" aria-hidden="true">旅</div>
@@ -205,6 +227,39 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <div class="toast" id="toast"></div>
 <script>
 const KEY='keuangan-jepang-v1',$=id=>document.getElementById(id);
+/* ---------- wajib dipasang sebagai PWA di HP (tidak boleh dipakai dari browser HP) ---------- */
+const UA=navigator.userAgent||'';
+const IS_PHONE=/android|iphone|ipad|ipod|mobile/i.test(UA)||(navigator.maxTouchPoints>1&&/Macintosh/.test(UA));   // termasuk iPad
+const IS_IOS=/iphone|ipad|ipod/i.test(UA)||(navigator.maxTouchPoints>1&&/Macintosh/.test(UA));
+const STANDALONE=['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(m=>{try{return matchMedia('(display-mode: '+m+')').matches}catch(e){return false}})||navigator.standalone===true;
+const GATED=IS_PHONE&&!STANDALONE;
+// link ajakan (#trip= / #tempel=) disimpan dulu supaya tidak hilang saat pindah ke aplikasi yang sudah terpasang
+try{
+  if(GATED){if(/^#(trip|tempel)=/.test(location.hash))localStorage.setItem('kj-pending-hash',location.hash)}
+  else{const ph=localStorage.getItem('kj-pending-hash');if(ph){localStorage.removeItem('kj-pending-hash');if(!/^#(trip|tempel)=/.test(location.hash)){history.replaceState(null,'',location.pathname+location.search+ph)}}}
+}catch(e){}
+let deferredInstall=null;
+function gateRender(){
+  const b=$('gateBody');if(!b)return;
+  let pend='';try{const h=localStorage.getItem('kj-pending-hash')||'';const m=/^#trip=([a-z0-9]+)/.exec(h);if(m)pend='<div class="kode">Kode trip kamu: <b>'+m[1]+'</b><br><span style="font-size:12px">Disimpan otomatis. Kalau setelah terpasang belum bergabung, tempel kode ini di tab Peserta &amp; Kurs, bagian Simpan online.</span></div>'}catch(e){}
+  const inapp=/FBAN|FBAV|Instagram|Line\/|MicroMessenger|WhatsApp|Telegram|TikTok/i.test(UA);
+  if(IS_IOS){
+    const safari=/Safari/i.test(UA)&&!/CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA)&&!inapp;
+    b.innerHTML=(safari?'<ol class="steps"><li>Ketuk tombol <b>Bagikan</b> (kotak dengan panah ↑) di bar bawah Safari.</li><li>Gulir lalu pilih <b>Tambah ke Layar Utama</b>.</li><li>Ketuk <b>Tambah</b>.</li><li>Tutup halaman ini, lalu buka aplikasi <b>Trip Jepang</b> dari layar utama.</li></ol>':'<div class="steps" style="padding-left:16px"><b>Buka di Safari dulu.</b> Di iPhone, aplikasi hanya bisa dipasang dari Safari. Salin link halaman ini, buka di Safari, lalu ikuti langkah pemasangan.</div>')+pend;
+    return;
+  }
+  b.innerHTML=(deferredInstall?'<button class="big" id="gateInstall" type="button">⬇ PASANG SEKARANG</button>':'<button class="big" id="gateInstall" type="button">⬇ PASANG SEKARANG</button>')+
+    '<div id="gateManual" class="steps hide" style="padding-left:16px"></div>'+
+    '<p style="font-size:12.5px;margin-top:10px;opacity:.95">Kalau tombol tidak memunculkan pemasangan: buka menu <b>⋮</b> di pojok kanan atas browser, lalu pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>.'+(inapp?' Kamu sedang di browser dalam aplikasi lain, jadi <b>buka dulu di Chrome</b>.':'')+'</p>'+pend;
+}
+function gateTampil(){if(!GATED)return;document.body.classList.add('gated');gateRender()}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;if(GATED)gateRender()});
+window.addEventListener('appinstalled',()=>{if(GATED&&$('gateBody'))$('gateBody').innerHTML='<div class="ok">✓ Sudah terpasang.<br>Tutup halaman ini, lalu buka aplikasi <b>Trip Jepang</b> lewat ikon di layar utama.</div>'});
+document.addEventListener('click',async e=>{const g=e.target.closest('#gateInstall');if(!g)return;
+  if(deferredInstall){deferredInstall.prompt();try{await deferredInstall.userChoice}catch(_){}deferredInstall=null;gateRender()}
+  else{const m=$('gateManual');m.classList.remove('hide');m.innerHTML='Browser belum menawarkan pemasangan otomatis. Buka menu <b>⋮</b> lalu pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>. Kalau menu itu tidak ada, buka halaman ini di <b>Chrome</b>.'}
+});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let S={orang:[],cat:[],kurs:110,nid:1,lunas:{}};
 try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.orang)&&Array.isArray(x.cat))S=Object.assign(S,x)}catch(e){}
@@ -474,7 +529,7 @@ function rSink(){
   stat.className='sinkstat'+(ST==='ok'?' ok':ST==='gagal'?' bad':'');
   stat.textContent=!ROOM?'○ Mode lokal (data hanya di HP ini)':ST==='ok'?'● Online · tersinkron antar HP':ST==='konek'?'◌ Menyambung ke trip online…':'⚠ Gagal tersambung';
   const pn=$('privNote');if(pn)pn.innerHTML=ROOM?'Data trip ini <b>tersimpan online</b> dan dipakai bersama semua yang memegang link trip. Siapa pun yang punya link bisa melihat dan mengubah, jadi <b>jangan dibagikan ke orang luar</b>.':'Data disimpan <b>hanya di HP ini</b>, tidak diunggah ke mana pun. Halaman ini bisa dibuka siapa saja, jadi angka di sini tidak terlihat orang lain. Untuk dipakai bersama, aktifkan <b>Simpan online</b> di tab Peserta &amp; Kurs.';
-  if(!ROOM){box.innerHTML='<p class="sub">Supaya semua peserta melihat data dan centang <b>sudah bayar</b> yang sama, aktifkan simpan online. Data HP ini dikirim jadi isi awal trip, lalu kamu membagikan link-nya ke teman.</p><button class="btn red full" id="sinkOn" type="button">Aktifkan simpan online</button>';return}
+  if(!ROOM){box.innerHTML='<p class="sub">Supaya semua peserta melihat data dan centang <b>sudah bayar</b> yang sama, aktifkan simpan online. Data HP ini dikirim jadi isi awal trip, lalu kamu membagikan link-nya ke teman.</p><button class="btn red full" id="sinkOn" type="button">Aktifkan simpan online</button><label style="margin-top:16px">Sudah punya link atau kode trip dari teman?</label><div class="linkbox"><input id="sinkKode" placeholder="tempel link atau kode trip"><button class="btn small" id="sinkGabung" type="button">Gabung</button></div>';return}
   let h='';
   if(ST==='ok')h+='<p class="sub"><b style="color:var(--plus)">Terhubung.</b> Perubahan di HP mana pun langsung muncul di HP lain.</p>';
   else if(ST==='konek')h+='<p class="sub">Menyambung…</p>';
@@ -487,16 +542,17 @@ function rSink(){
 document.addEventListener('click',e=>{
   const t=e.target.closest('button');if(!t)return;
   if(t.id==='sinkOn')aktifkanOnline();
+  else if(t.id==='sinkGabung'){const v=($('sinkKode').value||'').trim(),m=/(?:trip=)?([a-z0-9]{8,40})\s*$/i.exec(v);if(!m){toast('Kode trip tidak dikenali');return}gabungTrip(m[1].toLowerCase())}
   else if(t.id==='sinkLagi')startSync();
   else if(t.id==='sinkPutus')putusOnline();
   else if(t.id==='sinkSalin'){const l=linkTrip();(navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(()=>toast('Link tersalin ✓')).catch(()=>prompt('Salin link ini:',l))}
 });
 // link ajakan: #trip=KODE (dibaca lalu dihapus dari alamat)
-(function(){const m=/^#trip=([a-z0-9]{8,40})/.exec(location.hash);if(!m)return;history.replaceState(null,'',location.pathname+location.search);window.__gabung=m[1]})();
+(function(){const m=/^#trip=([a-z0-9]{8,40})/.exec(location.hash);if(!m||GATED)return;history.replaceState(null,'',location.pathname+location.search);window.__gabung=m[1]})();
 rSink();
-if(window.__gabung)gabungTrip(window.__gabung);else if(ROOM)startSync();
+if(GATED){gateTampil()}else if(window.__gabung)gabungTrip(window.__gabung);else if(ROOM)startSync();
 // link dengan data tertanam di bagian #, hanya dibaca di HP ini (tidak dikirim ke server), lalu dihapus dari alamat
-(function(){const m=/^#tempel=([\w-]+)/.exec(location.hash);if(!m)return;
+(function(){const m=/^#tempel=([\w-]+)/.exec(location.hash);if(!m||GATED)return;
   try{const b=atob(m[1].replace(/-/g,'+').replace(/_/g,'/')),u=Uint8Array.from(b,c=>c.charCodeAt(0)),o=JSON.parse(new TextDecoder().decode(u));
     history.replaceState(null,'',location.pathname+location.search);
     resetForm();tab('add');setJenis('p');$('ptxt').value=o.t||'';TPbayar=o.b||'';if(o.k>0)$('pkurs').value=o.k;tpBaca();
