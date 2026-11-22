@@ -106,6 +106,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .pay:last-child{border-bottom:0}
 .pay input{width:22px;height:22px;flex:none;accent-color:var(--plus);margin:0}
 .pay .pn{flex:1;min-width:0}.pay .amt{text-align:right;font-weight:800}.pay .amt small{display:block;color:var(--mute);font-weight:600;font-size:11px}
+.pay .amt small.fx{color:var(--shu);font-weight:700}
 .pay.done .pn,.pay.done .amt{opacity:.55;text-decoration:line-through}.pay.done .amt small{text-decoration:none;color:var(--plus);font-weight:800}
 .settle{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--mute);font-weight:600;font-size:11px}
@@ -354,37 +355,41 @@ const idr=c=>asing(c.mu)?c.jml*c.kurs:c.jml;   // nilai catatan dalam rupiah
 
 /* ---------- hitung ---------- */
 function hitung(){
-  const bayar={},pakai={},pair={};   // pair[pemakai][pemilik]
-  S.orang.forEach(o=>{bayar[o.id]=0;pakai[o.id]=0;pair[o.id]={}});
+  const bayar={},pakai={},pair={},pf={};   // pair[pemakai][pemilik]; pf = sama tapi dalam mata uang asli (hanya catatan non-Rupiah)
+  S.orang.forEach(o=>{bayar[o.id]=0;pakai[o.id]=0;pair[o.id]={};pf[o.id]={}});
   let total=0;
   S.cat.forEach(c=>{
     const v=idr(c);
     if(!(c.byr in bayar))return;
     bayar[c.byr]+=v;total+=v;
-    Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(asing(c.mu)?c.kurs:1);pakai[id]+=sh;if(id!==c.byr)pair[id][c.byr]=(pair[id][c.byr]||0)+sh});
+    Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(asing(c.mu)?c.kurs:1);pakai[id]+=sh;if(id!==c.byr){pair[id][c.byr]=(pair[id][c.byr]||0)+sh;if(asing(c.mu)){const q=pf[id][c.byr]||(pf[id][c.byr]={});q[c.mu]=(q[c.mu]||0)+c.bagi[k]}}});
   });
   const saldo={};S.orang.forEach(o=>{saldo[o.id]=bayar[o.id]-pakai[o.id]});
-  return{bayar,pakai,pair,saldo,total};
+  return{bayar,pakai,pair,pf,saldo,total};
 }
 // Utang per pasangan: HANYA saling dikurangkan antara dua orang yang sama (A↔B). Tidak ada penyederhanaan lewat orang ketiga,
 // jadi hasilnya tetap sesuai siapa memakai uang siapa.
-function pasangan(pair){
+function pasangan(pair,pf){
   const ids=S.orang.map(o=>o.id),out=[];
   for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
     const a=ids[i],b=ids[j],d=Math.round((pair[a][b]||0)-(pair[b][a]||0));   // >0: a berutang ke b
-    if(d>0)out.push({dari:a,ke:b,v:d});else if(d<0)out.push({dari:b,ke:a,v:-d});
+    if(!d)continue;
+    const dr=d>0?a:b,ke=d>0?b:a,fx={};   // fx: bagian utang yang berasal dari catatan mata uang asing (dinetto A↔B per mata uang, hanya yang searah)
+    Object.keys(MATA).forEach(m=>{if(m==='IDR')return;const n=((pf&&pf[dr]&&pf[dr][ke]&&pf[dr][ke][m])||0)-((pf&&pf[ke]&&pf[ke][dr]&&pf[ke][dr][m])||0);if(Math.abs(n)>0.0001)fx[m]=n});
+    out.push({dari:dr,ke:ke,v:Math.abs(d),fx});
   }
   return out;
 }
 
 /* ---------- tampilan ---------- */
 const bukaOrang=new Set();
+const fxTeks=x=>Object.keys(x.fx||{}).map((m,i)=>{const n=Math.round(x.fx[m]);return (n<0?' − ':(i?' + ':''))+MATA[m].s+' '+Math.abs(n).toLocaleString('id-ID')}).join('').trim();
 const lunasDari=x=>(S.lunas||{})[x.dari+'>'+x.ke]||0;
 const sisaX=x=>Math.max(0,x.v-lunasDari(x));
 function rSettle(L){
   if(!L.length){$('settle').innerHTML='<div class="empty">Semua sudah seimbang ✓</div>';return}
-  const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke;
-    return `<label class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}><span class="pn">${ket} <b>${esc(nama(lain))}</b></span><span class="amt">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')}</span></label>`};
+  const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke,ft=fxTeks(x);
+    return `<label class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}><span class="pn">${ket} <b>${esc(nama(lain))}</b></span><span class="amt">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')+(ft&&!done?'<small class="fx">termasuk '+ft+'</small>':'')}</span></label>`};
   $('settle').innerHTML=S.orang.filter(o=>L.some(x=>x.dari===o.id||x.ke===o.id)).map(o=>{
     const by=L.filter(x=>x.dari===o.id),tr=L.filter(x=>x.ke===o.id),sb=by.reduce((t,x)=>t+sisaX(x),0),st=tr.reduce((t,x)=>t+sisaX(x),0);
     return `<details class="who" data-o="${o.id}"${bukaOrang.has(o.id)?' open':''}><summary class="wh"><b>${esc(o.nama)}</b><span class="bd">${sb>=1?'<em class="b">bayar '+fIDR(sb)+'</em>':''}${st>=1?'<em class="t">terima '+fIDR(st)+'</em>':''}${sb<1&&st<1?'<em class="ok">lunas ✓</em>':''}</span></summary><div class="det">`+
@@ -393,7 +398,7 @@ function rSettle(L){
 $('settle').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.o){const id=+d.dataset.o;d.open?bukaOrang.add(id):bukaOrang.delete(id)}},true);
 $('settle').addEventListener('change',e=>{const c=e.target.closest('input[data-k]');if(!c)return;if(!S.lunas)S.lunas={};if(c.checked)S.lunas[c.dataset.k]=+c.dataset.v;else delete S.lunas[c.dataset.k];simpanS();rSum()});
 function rSum(){
-  const H=hitung(),L=pasangan(H.pair);
+  const H=hitung(),L=pasangan(H.pair,H.pf);
   $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
   if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';return}
   $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
