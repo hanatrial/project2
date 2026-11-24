@@ -107,6 +107,13 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .pay input{width:22px;height:22px;flex:none;accent-color:var(--plus);margin:0}
 .pay .pn{flex:1;min-width:0}.pay .amt{text-align:right;font-weight:800}.pay .amt small{display:block;color:var(--mute);font-weight:600;font-size:11px}
 .pay .amt small.fx{color:var(--shu);font-weight:700}
+.pairw{border-bottom:1px dashed var(--line)}.pairw .pay{border-bottom:0}
+.pay .pn small.rc{display:block;color:var(--mute);font-weight:600;font-size:11px;margin-top:2px}.pay .pn,.pay .amt{cursor:pointer}
+.evl{margin:0 0 8px 32px;padding:4px 10px;background:rgba(127,127,127,.08);border-radius:10px}
+.ev{display:flex;align-items:center;gap:10px;padding:8px 0;margin:0;border-bottom:1px dotted var(--line);font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--sumi);cursor:pointer}
+.ev:last-child{border-bottom:0}.ev input{width:20px;height:20px;flex:none;accent-color:var(--plus);margin:0}
+.ev .en{flex:1;min-width:0}.ev .en small{display:block;color:var(--mute);font-size:11px;font-weight:600}.ev .amt{text-align:right;font-weight:700;white-space:nowrap}.ev .amt small{display:block;color:var(--shu);font-weight:700;font-size:11px}
+.ev.done .en,.ev.done .amt{opacity:.5;text-decoration:line-through}
 .pay.done .pn,.pay.done .amt{opacity:.55;text-decoration:line-through}.pay.done .amt small{text-decoration:none;color:var(--plus);font-weight:800}
 .settle{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px}
 .settle:last-child{border-bottom:0}.settle .amt{margin-left:auto;text-align:right;font-weight:800}.settle small{display:block;color:var(--mute);font-weight:600;font-size:11px}
@@ -267,7 +274,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
   <div class="card"><h2>Hasil akhir per orang<span class="kj">精算</span></h2>
     <ul>
       <li>Tiap orang punya kartu. <b>Ketuk nama</b> untuk membuka: <b>Bayar ke siapa</b> dan <b>Terima dari siapa</b>, lengkap dengan jumlahnya.</li>
-      <li>Kalau <b>sudah bayar</b> (atau sudah menerima), <b>centang kotaknya</b>. Barisnya dicoret dan jadi “lunas ✓”. Centang terlihat oleh semua peserta.</li>
+      <li>Kalau <b>sudah bayar</b> (atau sudah menerima), <b>centang kotaknya</b>. Barisnya dicoret dan jadi “lunas ✓”. Ketuk nama/nominalnya untuk melihat <b>rincian per kejadian</b>; tiap kejadian bisa dicentang sendiri, dan kotak di baris atas mencentang semuanya. Centang terlihat oleh semua peserta.</li>
       <li>Utang <b>hanya saling dikurangkan antara dua orang yang sama</b>. Tidak dialihkan lewat orang lain, jadi hasilnya sesuai siapa memakai uang siapa.</li>
       <li>Kalau setelah dicentang ada pengeluaran baru yang menambah utang, sisanya muncul lagi.</li>
     </ul></div>
@@ -384,19 +391,50 @@ function pasangan(pair,pf){
 /* ---------- tampilan ---------- */
 const bukaOrang=new Set();
 const fxTeks=x=>Object.keys(x.fx||{}).map((m,i)=>{const n=Math.round(x.fx[m]);return (n<0?' − ':(i?' + ':''))+MATA[m].s+' '+Math.abs(n).toLocaleString('id-ID')}).join('').trim();
-const lunasDari=x=>(S.lunas||{})[x.dari+'>'+x.ke]||0;
+const bukaPair=new Set();
+// Rincian per kejadian untuk satu pasangan: nilai bertanda dari sisi "dari" (+ = dari berutang ke ke, − = sebaliknya)
+function kejadian(x){
+  const out=[];
+  S.cat.forEach(c=>{
+    const k=asing(c.mu)?c.kurs:1;
+    if(c.byr===x.ke&&c.bagi[x.dari]>0)out.push({c,v:c.bagi[x.dari]*k,a:c.bagi[x.dari],sg:1});
+    else if(c.byr===x.dari&&c.bagi[x.ke]>0)out.push({c,v:-c.bagi[x.ke]*k,a:c.bagi[x.ke],sg:-1});
+  });
+  return out.sort((p,q)=>String(p.c.tgl).localeCompare(String(q.c.tgl))||p.c.id-q.c.id);
+}
+const kunciE=(x,e)=>x.dari+'>'+x.ke+'#'+e.c.id;
+const lunasDari=x=>{const L=S.lunas||{};let t=L[x.dari+'>'+x.ke]||0;kejadian(x).forEach(e=>{if(L[kunciE(x,e)])t+=e.v});return t};
 const sisaX=x=>Math.max(0,x.v-lunasDari(x));
 function rSettle(L){
   if(!L.length){$('settle').innerHTML='<div class="empty">Semua sudah seimbang ✓</div>';return}
-  const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke,ft=fxTeks(x);
-    return `<label class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}><span class="pn">${ket} <b>${esc(nama(lain))}</b></span><span class="amt">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')+(ft&&!done?'<small class="fx">termasuk '+ft+'</small>':'')}</span></label>`};
+  const fe=e=>asing(e.c.mu)?' <small class="fx">'+MATA[e.c.mu].s+' '+Math.round(e.a).toLocaleString('id-ID')+'</small>':'';
+  const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke,ft=fxTeks(x),ev=kejadian(x),Ls=S.lunas||{},buka=bukaPair.has(k);
+    const nE=ev.filter(e=>Ls[kunciE(x,e)]).length,sebagian=!done&&(nE>0||(Ls[k]||0)>0);
+    const rinci=buka?'<div class="evl">'+ev.map(e=>{const key=kunciE(x,e),on=!!Ls[key]||(Ls[k]||0)>=x.v-0.5&&x.v>0;
+      return `<label class="ev${on?' done':''}"><input type="checkbox" data-e="${key}"${on?' checked':''}><span class="en">${esc(e.c.ket||'(tanpa nama)')}<small>${esc(e.c.tgl||'')} · ${esc(e.c.kat||'')}${e.sg<0?' · mengurangi (dibayar '+esc(nama(x.dari))+')':''}</small></span><span class="amt">${e.v<0?'−':''}${fIDR(Math.abs(e.v)).replace('−','')}${fe(e)}</span></label>`}).join('')+'</div>':'';
+    return `<div class="pairw"><div class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}${sebagian?' data-part="1"':''}><span class="pn" data-tg="${k}">${ket} <b>${esc(nama(lain))}</b><small class="rc">${buka?'▾':'▸'} ${ev.length} kejadian${nE?' · '+nE+' dicentang':''}</small></span><span class="amt" data-tg="${k}">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')+(ft?'<small class="fx">termasuk '+ft+'</small>':'')}</span></div>${rinci}</div>`};
   $('settle').innerHTML=S.orang.filter(o=>L.some(x=>x.dari===o.id||x.ke===o.id)).map(o=>{
     const by=L.filter(x=>x.dari===o.id),tr=L.filter(x=>x.ke===o.id),sb=by.reduce((t,x)=>t+sisaX(x),0),st=tr.reduce((t,x)=>t+sisaX(x),0);
     return `<details class="who" data-o="${o.id}"${bukaOrang.has(o.id)?' open':''}><summary class="wh"><b>${esc(o.nama)}</b><span class="bd">${sb>=1?'<em class="b">bayar '+fIDR(sb)+'</em>':''}${st>=1?'<em class="t">terima '+fIDR(st)+'</em>':''}${sb<1&&st<1?'<em class="ok">lunas ✓</em>':''}</span></summary><div class="det">`+
       (by.length?'<div class="dh">Bayar ke siapa</div>'+by.map(x=>baris(x,x.ke,'ke')).join(''):'')+(tr.length?'<div class="dh">Terima dari siapa</div>'+tr.map(x=>baris(x,x.dari,'dari')).join(''):'')+'</div></details>'}).join('');
+  document.querySelectorAll('#settle input[data-part]').forEach(i=>i.indeterminate=true);
 }
 $('settle').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.o){const id=+d.dataset.o;d.open?bukaOrang.add(id):bukaOrang.delete(id)}},true);
-$('settle').addEventListener('change',e=>{const c=e.target.closest('input[data-k]');if(!c)return;if(!S.lunas)S.lunas={};if(c.checked)S.lunas[c.dataset.k]=+c.dataset.v;else delete S.lunas[c.dataset.k];simpanS();rSum()});
+$('settle').addEventListener('click',e=>{const t=e.target.closest('[data-tg]');if(!t)return;const k=t.dataset.tg;bukaPair.has(k)?bukaPair.delete(k):bukaPair.add(k);rSum()});
+$('settle').addEventListener('change',e=>{
+  if(!S.lunas)S.lunas={};
+  const c=e.target.closest('input[data-k]'),ce=e.target.closest('input[data-e]');
+  if(c){   // centang semua (atau lepas semua) untuk satu pasangan
+    const [d,k]=c.dataset.k.split('>').map(Number),x={dari:d,ke:k};
+    delete S.lunas[c.dataset.k];kejadian(x).forEach(ev=>{const key=kunciE(x,ev);if(c.checked)S.lunas[key]=Math.round(ev.v);else delete S.lunas[key]});
+    if(c.checked&&!kejadian(x).length)S.lunas[c.dataset.k]=+c.dataset.v;
+  }else if(ce){   // centang satu kejadian
+    const key=ce.dataset.e,pk=key.split('#')[0],[d,k]=pk.split('>').map(Number),x={dari:d,ke:k},leg=S.lunas[pk]||0;
+    if(leg>0){delete S.lunas[pk];if(leg>=Math.round(Math.abs(pair2v(x)))-0.5)kejadian(x).forEach(ev=>{S.lunas[kunciE(x,ev)]=Math.round(ev.v)})}   // data lama (per pasangan) diubah jadi per kejadian
+    if(ce.checked)S.lunas[key]=1;else delete S.lunas[key];
+  }else return;
+  simpanS();rSum()});
+const pair2v=x=>kejadian(x).reduce((t,e)=>t+e.v,0);
 function rSum(){
   const H=hitung(),L=pasangan(H.pair,H.pf);
   $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
