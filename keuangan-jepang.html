@@ -407,19 +407,20 @@ function kejadian(x){
 }
 const kunciE=(x,e)=>x.dari+'>'+x.ke+'#'+e.c.id;
 const lunasDari=x=>{const L=S.lunas||{};let t=L[x.dari+'>'+x.ke]||0;kejadian(x).forEach(e=>{if(L[kunciE(x,e)])t+=e.v});return t};
-const sisaX=x=>Math.max(0,x.v-lunasDari(x));
+const sisaX=x=>x.v-lunasDari(x);   // bertanda: >0 dari masih harus bayar ke ke; <0 sudah kelebihan dibayar, jadi arahnya berbalik (ke harus bayar balik ke dari)
 function rSettle(L){
   if(!L.length){$('settle').innerHTML='<div class="empty">Semua sudah seimbang ✓</div>';return}
   const fe=e=>asing(e.c.mu)?' <small class="fx">'+(e.a<0?'−':'')+MATA[e.c.mu].s+' '+Math.abs(Math.round(e.a)).toLocaleString('id-ID')+'</small>':'';
-  const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke,ft=fxTeks(x),ev=kejadian(x),Ls=S.lunas||{},buka=bukaPair.has(k);
+  const baris=(x,lain,ket,flip)=>{const rs=sisaX(x),rem=Math.abs(rs),done=rem<1,k=x.dari+'>'+x.ke,ft=fxTeks(x),ev=kejadian(x),Ls=S.lunas||{},buka=bukaPair.has(k);
     const nE=ev.filter(e=>Ls[kunciE(x,e)]).length,sebagian=!done&&(nE>0||(Ls[k]||0)>0);
     const rinci=buka?'<div class="evl">'+ev.map(e=>{const key=kunciE(x,e),on=!!Ls[key]||(Ls[k]||0)>=x.v-0.5&&x.v>0;
       return `<label class="ev${on?' done':''}"><input type="checkbox" data-e="${key}"${on?' checked':''}><span class="en">${esc(e.c.ket||'(tanpa nama)')}<small>${esc(e.c.tgl||'')} · ${esc(e.c.kat||'')}${e.c.jml<0?' · refund':(e.sg<0?' · mengurangi (dibayar '+esc(nama(x.dari))+')':'')}</small></span><span class="amt">${e.v<0?'−':''}${fIDR(Math.abs(e.v)).replace('−','')}${fe(e)}</span></label>`}).join('')+'</div>':'';
-    return `<div class="pairw"><div class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}${sebagian?' data-part="1"':''}><span class="pn" data-tg="${k}">${ket} <b>${esc(nama(lain))}</b><small class="rc">${buka?'▾':'▸'} ${ev.length} kejadian${nE?' · '+nE+' dicentang':''}</small></span><span class="amt" data-tg="${k}">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')+(ft?'<small class="fx">termasuk '+ft+'</small>':'')}</span></div>${rinci}</div>`};
+    return `<div class="pairw"><div class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}${sebagian?' data-part="1"':''}><span class="pn" data-tg="${k}">${ket} <b>${esc(nama(lain))}</b><small class="rc">${buka?'▾':'▸'} ${ev.length} kejadian${nE?' · '+nE+' dicentang':''}</small></span><span class="amt" data-tg="${k}">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(flip?'<small>kelebihan/refund, dikembalikan</small>':(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')+(ft?'<small class="fx">termasuk '+ft+'</small>':''))}</span></div>${rinci}</div>`};
   $('settle').innerHTML=S.orang.filter(o=>L.some(x=>x.dari===o.id||x.ke===o.id)).map(o=>{
-    const by=L.filter(x=>x.dari===o.id),tr=L.filter(x=>x.ke===o.id),sb=by.reduce((t,x)=>t+sisaX(x),0),st=tr.reduce((t,x)=>t+sisaX(x),0);
+    const fl=x=>sisaX(x)<=-1,ab=x=>Math.abs(sisaX(x));   // arah efektif: pasangan yang sudah kelebihan dibayar berbalik arah
+    const by=L.filter(x=>x.dari===o.id?!fl(x):(x.ke===o.id&&fl(x))),tr=L.filter(x=>x.ke===o.id?!fl(x):(x.dari===o.id&&fl(x))),sb=by.reduce((t,x)=>t+ab(x),0),st=tr.reduce((t,x)=>t+ab(x),0);
     return `<details class="who" data-o="${o.id}"${bukaOrang.has(o.id)?' open':''}><summary class="wh"><b>${esc(o.nama)}</b><span class="bd">${sb>=1?'<em class="b">bayar '+fIDR(sb)+'</em>':''}${st>=1?'<em class="t">terima '+fIDR(st)+'</em>':''}${sb<1&&st<1?'<em class="ok">lunas ✓</em>':''}</span></summary><div class="det">`+
-      (by.length?'<div class="dh">Bayar ke siapa</div>'+by.map(x=>baris(x,x.ke,'ke')).join(''):'')+(tr.length?'<div class="dh">Terima dari siapa</div>'+tr.map(x=>baris(x,x.dari,'dari')).join(''):'')+'</div></details>'}).join('');
+      (by.length?'<div class="dh">Bayar ke siapa</div>'+by.map(x=>x.dari===o.id?baris(x,x.ke,'ke',false):baris(x,x.dari,'ke',true)).join(''):'')+(tr.length?'<div class="dh">Terima dari siapa</div>'+tr.map(x=>x.ke===o.id?baris(x,x.dari,'dari',false):baris(x,x.ke,'dari',true)).join(''):'')+'</div></details>'}).join('');
   document.querySelectorAll('#settle input[data-part]').forEach(i=>i.indeterminate=true);
 }
 $('settle').addEventListener('toggle',e=>{const d=e.target;if(d&&d.dataset&&d.dataset.o){const id=+d.dataset.o;d.open?bukaOrang.add(id):bukaOrang.delete(id)}},true);
@@ -442,7 +443,7 @@ function rSum(){
   const H=hitung(),L=pasangan(H.pair,H.pf);
   $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
   if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';return}
-  const sisa={};S.orang.forEach(o=>sisa[o.id]=0);L.forEach(x=>{const r=sisaX(x);sisa[x.dari]-=r;sisa[x.ke]+=r});   // + masih akan diterima, − masih harus dibayar (setelah dikurangi yang sudah dicentang)
+  const sisa={};S.orang.forEach(o=>sisa[o.id]=0);L.forEach(x=>{const r=sisaX(x);sisa[x.dari]-=r;sisa[x.ke]+=r});   // r bertanda   // + masih akan diterima, − masih harus dibayar (setelah dikurangi yang sudah dicentang)
   $('saldo').innerHTML='<table class="tsaldo"><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th><th>Sisa</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id],q=sisa[o.id];
     return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}</td><td class="sisa ${q>0.5?'pos':q<-0.5?'neg':''}">${Math.abs(q)<0.5?'lunas ✓':(q>0?'+':'')+fIDR(q)}</td></tr>`}).join('')+'</table>';
   rSettle(L);
