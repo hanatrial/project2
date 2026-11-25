@@ -108,6 +108,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .pay .pn{flex:1;min-width:0}.pay .amt{text-align:right;font-weight:800}.pay .amt small{display:block;color:var(--mute);font-weight:600;font-size:11px}
 .pay .amt small.fx{color:var(--shu);font-weight:700}
 .tsaldo th,.tsaldo td{padding-left:4px;padding-right:4px;font-size:11.5px;white-space:nowrap}.tsaldo th{font-size:10px;letter-spacing:.04em}.tsaldo td.sisa{font-weight:800;border-left:1px dashed var(--line)}
+.rfd{display:flex;align-items:center;gap:8px;margin:2px 0 10px;font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--sumi);cursor:pointer}.rfd input{width:20px;height:20px;accent-color:var(--shu);margin:0}
 .pairw{border-bottom:1px dashed var(--line)}.pairw .pay{border-bottom:0}
 .pay .pn small.rc{display:block;color:var(--mute);font-weight:600;font-size:11px;margin-top:2px}.pay .pn,.pay .amt{cursor:pointer}
 .evl{margin:0 0 8px 32px;padding:4px 10px;background:rgba(127,127,127,.08);border-radius:10px}
@@ -204,6 +205,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
       <label>Keterangan</label><input id="ket" placeholder="mis. Ramen Ichiran, tiket Shinkansen">
       <div class="row"><div><label>Tanggal</label><input type="date" id="tgl"></div><div><label>Kategori</label><select id="kat"><option value="Makan">🍜 Makan</option><option value="Transport">🚃 Transport</option><option value="Belanja">🛍️ Belanja</option><option value="Hotel">🏨 Hotel</option><option value="Tiket / wisata">⛩️ Tiket / wisata</option><option value="Lain-lain">🍡 Lain-lain</option></select></div></div>
       <div class="row"><div><label>Jumlah</label><input id="jml" inputmode="decimal" placeholder="0"></div><div><label>Mata uang</label><select id="mu"><option value="JPY">JPY (¥) Jepang</option><option value="SGD">SGD (S$) Singapura</option><option value="VND">VND (₫) Vietnam</option><option value="MYR">MYR (RM) Kuala Lumpur</option><option value="IDR">IDR (Rp)</option></select></div></div>
+      <label class="rfd"><input type="checkbox" id="refund"> <span>Ini <b>refund / pengembalian</b> (nilainya jadi minus, mengurangi utang)</span></label>
       <div id="kursRow"><label id="kursLbl">Kurs: 1 JPY = … Rp (untuk catatan ini)</label><input id="kurs" inputmode="decimal"></div>
       <label>Dibayar oleh (pakai uang siapa)</label><select id="byr"></select>
       <label>Dipakai untuk siapa</label><p class="sub" style="margin:0 0 4px"><b style="color:var(--shu)">✓ berwarna</b> = ikut memakai (ikut ditagih). <b>Kosong bergaris</b> = tidak ikut. Ketuk nama untuk memilih atau membatalkan.</p><div class="chips" id="pakai"></div>
@@ -398,8 +400,8 @@ function kejadian(x){
   const out=[];
   S.cat.forEach(c=>{
     const k=asing(c.mu)?c.kurs:1;
-    if(c.byr===x.ke&&c.bagi[x.dari]>0)out.push({c,v:c.bagi[x.dari]*k,a:c.bagi[x.dari],sg:1});
-    else if(c.byr===x.dari&&c.bagi[x.ke]>0)out.push({c,v:-c.bagi[x.ke]*k,a:c.bagi[x.ke],sg:-1});
+    if(c.byr===x.ke&&c.bagi[x.dari])out.push({c,v:c.bagi[x.dari]*k,a:c.bagi[x.dari],sg:1});
+    else if(c.byr===x.dari&&c.bagi[x.ke])out.push({c,v:-c.bagi[x.ke]*k,a:c.bagi[x.ke],sg:-1});
   });
   return out.sort((p,q)=>String(p.c.tgl).localeCompare(String(q.c.tgl))||p.c.id-q.c.id);
 }
@@ -408,11 +410,11 @@ const lunasDari=x=>{const L=S.lunas||{};let t=L[x.dari+'>'+x.ke]||0;kejadian(x).
 const sisaX=x=>Math.max(0,x.v-lunasDari(x));
 function rSettle(L){
   if(!L.length){$('settle').innerHTML='<div class="empty">Semua sudah seimbang ✓</div>';return}
-  const fe=e=>asing(e.c.mu)?' <small class="fx">'+MATA[e.c.mu].s+' '+Math.round(e.a).toLocaleString('id-ID')+'</small>':'';
+  const fe=e=>asing(e.c.mu)?' <small class="fx">'+(e.a<0?'−':'')+MATA[e.c.mu].s+' '+Math.abs(Math.round(e.a)).toLocaleString('id-ID')+'</small>':'';
   const baris=(x,lain,ket)=>{const rem=sisaX(x),done=rem<1,k=x.dari+'>'+x.ke,ft=fxTeks(x),ev=kejadian(x),Ls=S.lunas||{},buka=bukaPair.has(k);
     const nE=ev.filter(e=>Ls[kunciE(x,e)]).length,sebagian=!done&&(nE>0||(Ls[k]||0)>0);
     const rinci=buka?'<div class="evl">'+ev.map(e=>{const key=kunciE(x,e),on=!!Ls[key]||(Ls[k]||0)>=x.v-0.5&&x.v>0;
-      return `<label class="ev${on?' done':''}"><input type="checkbox" data-e="${key}"${on?' checked':''}><span class="en">${esc(e.c.ket||'(tanpa nama)')}<small>${esc(e.c.tgl||'')} · ${esc(e.c.kat||'')}${e.sg<0?' · mengurangi (dibayar '+esc(nama(x.dari))+')':''}</small></span><span class="amt">${e.v<0?'−':''}${fIDR(Math.abs(e.v)).replace('−','')}${fe(e)}</span></label>`}).join('')+'</div>':'';
+      return `<label class="ev${on?' done':''}"><input type="checkbox" data-e="${key}"${on?' checked':''}><span class="en">${esc(e.c.ket||'(tanpa nama)')}<small>${esc(e.c.tgl||'')} · ${esc(e.c.kat||'')}${e.c.jml<0?' · refund':(e.sg<0?' · mengurangi (dibayar '+esc(nama(x.dari))+')':'')}</small></span><span class="amt">${e.v<0?'−':''}${fIDR(Math.abs(e.v)).replace('−','')}${fe(e)}</span></label>`}).join('')+'</div>':'';
     return `<div class="pairw"><div class="pay${done?' done':''}"><input type="checkbox" data-k="${k}" data-v="${x.v}"${done?' checked':''}${sebagian?' data-part="1"':''}><span class="pn" data-tg="${k}">${ket} <b>${esc(nama(lain))}</b><small class="rc">${buka?'▾':'▸'} ${ev.length} kejadian${nE?' · '+nE+' dicentang':''}</small></span><span class="amt" data-tg="${k}">${done?fIDR(x.v)+'<small>lunas ✓</small>':fIDR(rem)+(rem<x.v-0.5?'<small>sisa dari '+fIDR(x.v)+'</small>':'')+(ft?'<small class="fx">termasuk '+ft+'</small>':'')}</span></div>${rinci}</div>`};
   $('settle').innerHTML=S.orang.filter(o=>L.some(x=>x.dari===o.id||x.ke===o.id)).map(o=>{
     const by=L.filter(x=>x.dari===o.id),tr=L.filter(x=>x.ke===o.id),sb=by.reduce((t,x)=>t+sisaX(x),0),st=tr.reduce((t,x)=>t+sisaX(x),0);
@@ -463,14 +465,15 @@ function rCustom(){
   $('customBox').innerHTML=[...pakaiSet].map(id=>`<label>${esc(nama(id))}</label><input inputmode="decimal" data-id="${id}" value="${keep[id]||''}" placeholder="nominal dalam mata uang di atas">`).join('')||'<p class="sub">Pilih dulu siapa yang memakai.</p>';
 }
 function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('simpan').classList.remove('hide')}
-function resetForm(){editId=null;['ket','jml'].forEach(i=>$(i).value='');$('tgl').value=hariIni();$('kurs').value=kursDari('JPY');$('mu').value='JPY';$('mode').value='rata';
+function resetForm(){editId=null;['ket','jml'].forEach(i=>$(i).value='');$('refund').checked=false;$('tgl').value=hariIni();$('kurs').value=kursDari('JPY');$('mu').value='JPY';$('mode').value='rata';
   pakaiSet=new Set(S.orang.map(o=>o.id));$('addTitle').textContent='Catat baru';$('batal').classList.add('hide');$('err').textContent='';setJenis('x');rForm()}
 function simpan(){
   const err=m=>{$('err').textContent=m;return false};
   if(S.orang.length<2)return err('Tambah minimal 2 peserta dulu di tab Peserta & Kurs.');
   {
-    const jml=num($('jml').value),kurs=num($('kurs').value),mu=$('mu').value;
-    if(!(jml>0))return err('Isi jumlah dengan angka lebih dari 0.');
+    const j0=num($('jml').value),kurs=num($('kurs').value),mu=$('mu').value;
+    if(!j0)return err('Isi jumlah dengan angka (tidak boleh 0).');
+    const sg=($('refund').checked||j0<0)?-1:1,jml=Math.abs(j0);   // refund: semua nilai dikali −1
     if(asing(mu)&&!(kurs>0))return err('Isi kurs.');
     if(!pakaiSet.size)return err('Pilih siapa yang memakai.');
     const bagi={};
@@ -478,7 +481,7 @@ function simpan(){
     else{let sum=0;let ok=true;document.querySelectorAll('#customBox input').forEach(i=>{const v=num(i.value);if(!(v>=0)){ok=false}else{bagi[i.dataset.id]=v;sum+=v}});
       if(!ok)return err('Isi nominal semua orang yang dipilih.');
       if(Math.abs(sum-jml)>0.5)return err('Jumlah nominal ('+Math.round(sum).toLocaleString('id-ID')+') belum sama dengan total ('+Math.round(jml).toLocaleString('id-ID')+').')}
-    const c={id:editId||newId(),t:'x',tgl:$('tgl').value||hariIni(),ket:$('ket').value.trim()||'(tanpa keterangan)',kat:$('kat').value,jml,mu,kurs:asing(mu)?kurs:1,byr:+$('byr').value,bagi};
+    const c={id:editId||newId(),t:'x',tgl:$('tgl').value||hariIni(),ket:$('ket').value.trim()||'(tanpa keterangan)',kat:$('kat').value,jml:sg*jml,mu,kurs:asing(mu)?kurs:1,byr:+$('byr').value,bagi:Object.fromEntries(Object.keys(bagi).map(k=>[k,sg*bagi[k]]))};
     put(c);
   }
   $('err').textContent='';simpanS();toast(editId?'Perubahan disimpan ✓':'Tersimpan ✓');resetForm();rAll();tab('sum');
@@ -510,8 +513,8 @@ $('kursList').onchange=e=>{const i=e.target.closest('input[data-m]');if(!i)retur
 $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('[data-e]');
   if(h){if(confirm('Hapus catatan ini?')){S.cat=S.cat.filter(c=>c.id!==+h.dataset.h);simpanS();rAll()}return}
   if(ed){const c=S.cat.find(x=>x.id===+ed.dataset.e);if(!c)return;resetForm();editId=c.id;$('addTitle').textContent='Ubah catatan';$('batal').classList.remove('hide');setJenis('x');
-    {$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=c.jml;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
-      const rata=Object.values(c.bagi).every(v=>Math.abs(v-c.jml/pakaiSet.size)<0.01);$('mode').value=rata?'rata':'custom';rCustom();if(!rata)document.querySelectorAll('#customBox input').forEach(i=>i.value=c.bagi[i.dataset.id]);}
+    {$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=Math.abs(c.jml);$('refund').checked=c.jml<0;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
+      const rata=Object.values(c.bagi).every(v=>Math.abs(v-c.jml/pakaiSet.size)<0.01);$('mode').value=rata?'rata':'custom';rCustom();if(!rata)document.querySelectorAll('#customBox input').forEach(i=>i.value=Math.abs(c.bagi[i.dataset.id]));}
     tab('add')}};
 resetForm();rAll();
 /* ---------- simpan online (Firestore, proyek mds-sulawesi) ----------
