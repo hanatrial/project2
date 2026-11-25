@@ -107,6 +107,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 .pay input{width:22px;height:22px;flex:none;accent-color:var(--plus);margin:0}
 .pay .pn{flex:1;min-width:0}.pay .amt{text-align:right;font-weight:800}.pay .amt small{display:block;color:var(--mute);font-weight:600;font-size:11px}
 .pay .amt small.fx{color:var(--shu);font-weight:700}
+.tsaldo th,.tsaldo td{padding-left:4px;padding-right:4px;font-size:11.5px;white-space:nowrap}.tsaldo th{font-size:10px;letter-spacing:.04em}.tsaldo td.sisa{font-weight:800;border-left:1px dashed var(--line)}
 .pairw{border-bottom:1px dashed var(--line)}.pairw .pay{border-bottom:0}
 .pay .pn small.rc{display:block;color:var(--mute);font-weight:600;font-size:11px;margin-top:2px}.pay .pn,.pay .amt{cursor:pointer}
 .evl{margin:0 0 8px 32px;padding:4px 10px;background:rgba(127,127,127,.08);border-radius:10px}
@@ -189,7 +190,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 <section id="v-sum">
   <div class="tot" id="tot"></div>
   <div class="card"><h2>Saldo per orang<span class="kj">残高</span></h2><div id="saldo"></div>
-    <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain. <b class="neg">Merah (−)</b> = lebih banyak memakai uang orang lain. Ini hanya total. Siapa membayar ke siapa mengikuti bagian <b>Hasil akhir per orang</b> di bawah.</p></div>
+    <p class="sub" style="margin-top:8px"><b class="pos">Hijau (+)</b> = uangnya masih dipakai orang lain. <b class="neg">Merah (−)</b> = lebih banyak memakai uang orang lain. <b>Sisa</b> = saldo yang masih tersisa setelah dikurangi yang sudah dicentang di Hasil akhir (otomatis ikut berubah, juga dari HP lain). Siapa membayar ke siapa mengikuti bagian <b>Hasil akhir per orang</b> di bawah.</p></div>
   <div class="card"><h2>Hasil akhir per orang<span class="kj">精算</span></h2><div class="note" style="margin-bottom:10px"><b>Ketuk nama</b> untuk membuka detailnya. Kalau <b>sudah bayar</b> (atau sudah menerima), <b>centang kotaknya</b>. Centang terlihat oleh semua peserta.</div><p class="sub" style="margin-bottom:6px">Sesuai siapa memakai uang siapa. Hanya saling dikurangkan antara dua orang yang sama, tidak dialihkan lewat orang lain.</p><div id="settle"></div></div>
 </section>
 
@@ -439,8 +440,9 @@ function rSum(){
   const H=hitung(),L=pasangan(H.pair,H.pf);
   $('tot').innerHTML=`<div><span class="ic">💴</span><b>${fIDR(H.total)}</b><span>Total pengeluaran bersama</span></div><div><span class="ic">🏮</span><b>${S.cat.length}</b><span>catatan · ${S.orang.length} peserta</span></div>`;
   if(!S.orang.length){$('saldo').innerHTML='<div class="empty">Tambah peserta dulu di tab Peserta &amp; Kurs.</div>';$('settle').innerHTML='';return}
-  $('saldo').innerHTML='<table><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id];
-    return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}</td></tr>`}).join('')+'</table>';
+  const sisa={};S.orang.forEach(o=>sisa[o.id]=0);L.forEach(x=>{const r=sisaX(x);sisa[x.dari]-=r;sisa[x.ke]+=r});   // + masih akan diterima, − masih harus dibayar (setelah dikurangi yang sudah dicentang)
+  $('saldo').innerHTML='<table class="tsaldo"><tr><th>Nama</th><th>Bayar</th><th>Pakai</th><th>Saldo</th><th>Sisa</th></tr>'+S.orang.map(o=>{const s=H.saldo[o.id],q=sisa[o.id];
+    return `<tr><td><b>${esc(o.nama)}</b></td><td>${fIDR(H.bayar[o.id])}</td><td>${fIDR(H.pakai[o.id])}</td><td class="${s>0.5?'pos':s<-0.5?'neg':''}">${Math.abs(s)<0.5?'lunas':(s>0?'+':'')+fIDR(s)}</td><td class="sisa ${q>0.5?'pos':q<-0.5?'neg':''}">${Math.abs(q)<0.5?'lunas ✓':(q>0?'+':'')+fIDR(q)}</td></tr>`}).join('')+'</table>';
   rSettle(L);
 }
 
