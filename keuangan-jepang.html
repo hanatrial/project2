@@ -225,7 +225,7 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
 
 <!-- RIWAYAT -->
 <section id="v-his" class="hide">
-  <div class="card"><h2>Riwayat<span class="kj">履歴</span></h2><select id="fOrang"></select><div id="hist" style="margin-top:6px"></div></div>
+  <div class="card"><h2>Riwayat<span class="kj">履歴</span></h2><select id="fOrang"></select><input id="cari" type="search" placeholder="🔍 Cari catatan (keterangan, nama, kategori, tanggal, nominal…)" autocomplete="off" style="margin-top:8px"><div id="cariInfo" class="sub" style="margin-top:6px"></div><div id="hist" style="margin-top:6px"></div></div>
 </section>
 
 <!-- PESERTA & KURS -->
@@ -505,6 +505,10 @@ function put(c){const i=S.cat.findIndex(x=>x.id===c.id);if(i>=0)S.cat[i]=c;else 
 function rHist(){
   const f=$('fOrang').value;let L=S.cat.slice().sort((a,b)=>String(b.tgl).localeCompare(String(a.tgl))||b.id-a.id);
   if(f)L=L.filter(c=>pembayar(c).includes(+f)||c.bagi[f]!==undefined);
+  const q=($('cari').value||'').toLowerCase().trim(),total=L.length;
+  if(q){const kata=q.split(/\s+/);   // semua kata harus ada (tidak peduli huruf besar/kecil)
+    L=L.filter(c=>{const h=[c.ket,c.kat,c.tgl,c.mu,...pembayar(c).map(nama),...Object.keys(c.bagi).map(k=>nama(+k)),Math.abs(c.jml),Math.round(Math.abs(idr(c))),Math.round(Math.abs(idr(c))).toLocaleString('id-ID')].join(' ').toLowerCase();return kata.every(w=>h.includes(w))})}
+  $('cariInfo').textContent=q?L.length+' dari '+total+' catatan cocok dengan “'+$('cari').value.trim()+'”':'';
   $('hist').innerHTML=L.length?L.map(c=>{const v=idr(c),asli=asing(c.mu)?(MATA[c.mu]?MATA[c.mu].s:c.mu+' ')+Math.round(c.jml).toLocaleString('en-US')+' × '+fK(c.kurs)+' = ':'';
     const d=`Dibayar <b>${pembayar(c).map(i=>esc(nama(i))+(c.byrs?' ('+(asing(c.mu)?MATA[c.mu].s+' ':'Rp ')+Math.abs(Math.round(c.byrs[i])).toLocaleString('id-ID')+')':'')).join(' + ')}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
     return `<div class="hist"><div class="h1"><span>${(IKON[c.kat]||'🍡')+' '}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)} · ${esc(c.kat)}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
@@ -523,7 +527,7 @@ $('pakai').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;const id=+
 $('semua').onclick=()=>{pakaiSet=new Set(S.orang.map(o=>o.id));rForm()};$('kosong').onclick=()=>{pakaiSet=new Set();rForm()};
 $('mode').onchange=rCustom;$('mu').onchange=()=>{if(asing($('mu').value))$('kurs').value=kursDari($('mu').value);rForm()};
 $('simpan').onclick=simpan;$('batal').onclick=()=>{resetForm();tab('his')};
-$('fOrang').onchange=rHist;
+$('fOrang').onchange=rHist;$('cari').addEventListener('input',rHist);
 $('kursList').onchange=e=>{const i=e.target.closest('input[data-m]');if(!i)return;const v=num(i.value);if(!(v>0)){toast('Isi kurs dengan angka');i.value=fK(kursDari(i.dataset.m));return}S.kurss[i.dataset.m]=v;S.kurs=S.kurss.JPY;simpanS();if($('mu').value===i.dataset.m)$('kurs').value=v;toast('Kurs '+i.dataset.m+' disimpan ✓')};
 $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('[data-e]');
   if(h){if(confirm('Hapus catatan ini?')){S.cat=S.cat.filter(c=>c.id!==+h.dataset.h);simpanS();rAll()}return}
