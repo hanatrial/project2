@@ -208,6 +208,8 @@ td{text-align:right;padding:9px 4px;border-bottom:1px dashed var(--line);font-va
       <label class="rfd"><input type="checkbox" id="refund"> <span>Ini <b>refund / pengembalian</b> (nilainya jadi minus, mengurangi utang)</span></label>
       <div id="kursRow"><label id="kursLbl">Kurs: 1 JPY = … Rp (untuk catatan ini)</label><input id="kurs" inputmode="decimal"></div>
       <label>Dibayar oleh (pakai uang siapa)</label><select id="byr"></select>
+      <label>Pembayar kedua (opsional, kalau patungan)</label><select id="byr2"></select>
+      <div id="byr2Box" class="hide"><label>Bagian pembayar pertama (kosongkan = dibagi rata, sisanya dibayar pembayar kedua)</label><input id="byr1amt" inputmode="decimal" placeholder="nominal dalam mata uang di atas"></div>
       <label>Dipakai untuk siapa</label><p class="sub" style="margin:0 0 4px"><b style="color:var(--shu)">✓ berwarna</b> = ikut memakai (ikut ditagih). <b>Kosong bergaris</b> = tidak ikut. Ketuk nama untuk memilih atau membatalkan.</p><div class="chips" id="pakai"></div>
       <div style="margin-top:6px;display:flex;gap:6px"><button class="btn ghost small" id="semua" type="button">Pilih semua</button><button class="btn ghost small" id="kosong" type="button">Kosongkan</button></div>
       <label>Pembagian</label><select id="mode"><option value="rata">Rata</option><option value="custom">Nominal per orang</option></select>
@@ -361,6 +363,8 @@ const nama=id=>{const o=S.orang.find(x=>x.id===id);return o?o.nama:'(dihapus)'};
 const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1800)};
 const hariIni=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 const IKON={'Makan':'🍜','Transport':'🚃','Belanja':'🛍️','Hotel':'🏨','Tiket / wisata':'⛩️','Lain-lain':'🍡'};
+const pembayar=c=>c.byrs?Object.keys(c.byrs).map(Number):[c.byr];
+const frac=(c,id)=>c.byrs?((c.byrs[id]||0)/c.jml):(c.byr===id?1:0);   // porsi pembayaran oleh id (patungan: 2 orang)
 const idr=c=>asing(c.mu)?c.jml*c.kurs:c.jml;   // nilai catatan dalam rupiah
 
 /* ---------- hitung ---------- */
@@ -370,9 +374,9 @@ function hitung(){
   let total=0;
   S.cat.forEach(c=>{
     const v=idr(c);
-    if(!(c.byr in bayar))return;
-    bayar[c.byr]+=v;total+=v;
-    Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(asing(c.mu)?c.kurs:1);pakai[id]+=sh;if(id!==c.byr){pair[id][c.byr]=(pair[id][c.byr]||0)+sh;if(asing(c.mu)){const q=pf[id][c.byr]||(pf[id][c.byr]={});q[c.mu]=(q[c.mu]||0)+c.bagi[k]}}});
+    const py=pembayar(c).filter(id=>id in bayar);if(!py.length)return;
+    total+=v;py.forEach(id=>{bayar[id]+=v*frac(c,id)});
+    Object.keys(c.bagi).forEach(k=>{const id=+k;if(!(id in pakai))return;const sh=c.bagi[k]*(asing(c.mu)?c.kurs:1);pakai[id]+=sh;py.forEach(b=>{if(id===b)return;const f=frac(c,b);pair[id][b]=(pair[id][b]||0)+sh*f;if(asing(c.mu)){const q=pf[id][b]||(pf[id][b]={});q[c.mu]=(q[c.mu]||0)+c.bagi[k]*f}})});
   });
   const saldo={};S.orang.forEach(o=>{saldo[o.id]=bayar[o.id]-pakai[o.id]});
   return{bayar,pakai,pair,pf,saldo,total};
@@ -400,8 +404,8 @@ function kejadian(x){
   const out=[];
   S.cat.forEach(c=>{
     const k=asing(c.mu)?c.kurs:1;
-    if(c.byr===x.ke&&c.bagi[x.dari])out.push({c,v:c.bagi[x.dari]*k,a:c.bagi[x.dari],sg:1});
-    else if(c.byr===x.dari&&c.bagi[x.ke])out.push({c,v:-c.bagi[x.ke]*k,a:c.bagi[x.ke],sg:-1});
+    const a=(c.bagi[x.dari]||0)*frac(c,x.ke)-(c.bagi[x.ke]||0)*frac(c,x.dari);   // searah dari→ke dikurangi arah sebaliknya (patungan bisa dua arah)
+    if(Math.abs(a)>1e-9)out.push({c,v:a*k,a,sg:a>0?1:-1});
   });
   return out.sort((p,q)=>String(p.c.tgl).localeCompare(String(q.c.tgl))||p.c.id-q.c.id);
 }
@@ -456,18 +460,27 @@ function rForm(){
   const has=v=>S.orang.some(o=>String(o.id)===String(v));
   const kb=$('byr').value;   // pertahankan pilihan saat form digambar ulang (mis. setelah ganti mata uang)
   opsOrang($('byr'),has(kb)?kb:(S.orang[0]&&S.orang[0].id));
+  const k2=$('byr2').value;opsOrang($('byr2'),has(k2)?k2:'');$('byr2').insertAdjacentHTML('afterbegin','<option value="">— tidak ada —</option>');$('byr2').value=has(k2)?k2:'';$('byr2Box').classList.toggle('hide',!$('byr2').value);
   $('pakai').innerHTML=S.orang.map(o=>`<button type="button" class="chip${pakaiSet.has(o.id)?' on':''}" data-id="${o.id}" aria-pressed="${pakaiSet.has(o.id)}">${pakaiSet.has(o.id)?'✓ ':''}${esc(o.nama)}</button>`).join('')||'<span class="sub">Belum ada peserta.</span>';
   rCustom();
   const mu0=$('mu').value;$('kursRow').classList.toggle('hide',!asing(mu0));$('kursLbl').textContent=asing(mu0)?'Kurs: 1 '+mu0+' = … Rp (untuk catatan ini)':'';
 }
+$('byr2').addEventListener('change',()=>$('byr2Box').classList.toggle('hide',!$('byr2').value));
 function rCustom(){
   const m=$('mode').value==='custom';$('customBox').classList.toggle('hide',!m);if(!m)return;
   const keep={};document.querySelectorAll('#customBox input').forEach(i=>keep[i.dataset.id]=i.value);
   $('customBox').innerHTML=[...pakaiSet].map(id=>`<label>${esc(nama(id))}</label><input inputmode="decimal" data-id="${id}" value="${keep[id]||''}" placeholder="nominal dalam mata uang di atas">`).join('')||'<p class="sub">Pilih dulu siapa yang memakai.</p>';
 }
 function setJenis(j){jenis=j;document.querySelectorAll('#jenis .chip').forEach(c=>c.classList.toggle('on',c.dataset.j===j));$('fx').classList.toggle('hide',j!=='x');$('simpan').classList.remove('hide')}
-function resetForm(){editId=null;['ket','jml'].forEach(i=>$(i).value='');$('refund').checked=false;$('tgl').value=hariIni();$('kurs').value=kursDari('JPY');$('mu').value='JPY';$('mode').value='rata';
+function resetForm(){editId=null;['ket','jml'].forEach(i=>$(i).value='');$('refund').checked=false;$('byr2').value='';$('byr1amt').value='';$('tgl').value=hariIni();$('kurs').value=kursDari('JPY');$('mu').value='JPY';$('mode').value='rata';
   pakaiSet=new Set(S.orang.map(o=>o.id));$('addTitle').textContent='Catat baru';$('batal').classList.add('hide');$('err').textContent='';setJenis('x');rForm()}
+function byrData(sg,jml,mu){   // pembayar kedua (opsional): hasilkan byrs {id:nominal}; error dilempar sebagai string
+  const b1=+$('byr').value,b2=$('byr2').value?+$('byr2').value:0;if(!b2)return{};
+  if(b2===b1)throw 'Pembayar kedua harus orang yang berbeda.';
+  const t=$('byr1amt').value.trim(),a1=t?num(t):jml/2;
+  if(!(a1>=0)||a1>jml+0.5)throw 'Bagian pembayar pertama tidak valid (0 sampai '+Math.round(jml).toLocaleString('id-ID')+').';
+  return{byrs:{[b1]:sg*a1,[b2]:sg*(jml-a1)}};
+}
 function simpan(){
   const err=m=>{$('err').textContent=m;return false};
   if(S.orang.length<2)return err('Tambah minimal 2 peserta dulu di tab Peserta & Kurs.');
@@ -482,7 +495,8 @@ function simpan(){
     else{let sum=0;let ok=true;document.querySelectorAll('#customBox input').forEach(i=>{const v=num(i.value);if(!(v>=0)){ok=false}else{bagi[i.dataset.id]=v;sum+=v}});
       if(!ok)return err('Isi nominal semua orang yang dipilih.');
       if(Math.abs(sum-jml)>0.5)return err('Jumlah nominal ('+Math.round(sum).toLocaleString('id-ID')+') belum sama dengan total ('+Math.round(jml).toLocaleString('id-ID')+').')}
-    const c={id:editId||newId(),t:'x',tgl:$('tgl').value||hariIni(),ket:$('ket').value.trim()||'(tanpa keterangan)',kat:$('kat').value,jml:sg*jml,mu,kurs:asing(mu)?kurs:1,byr:+$('byr').value,bagi:Object.fromEntries(Object.keys(bagi).map(k=>[k,sg*bagi[k]]))};
+    let bd;try{bd=byrData(sg,jml,mu)}catch(m){return err(m)}
+    const c={id:editId||newId(),t:'x',tgl:$('tgl').value||hariIni(),ket:$('ket').value.trim()||'(tanpa keterangan)',kat:$('kat').value,jml:sg*jml,mu,kurs:asing(mu)?kurs:1,byr:+$('byr').value,...bd,bagi:Object.fromEntries(Object.keys(bagi).map(k=>[k,sg*bagi[k]]))};
     put(c);
   }
   $('err').textContent='';simpanS();toast(editId?'Perubahan disimpan ✓':'Tersimpan ✓');resetForm();rAll();tab('sum');
@@ -490,9 +504,9 @@ function simpan(){
 function put(c){const i=S.cat.findIndex(x=>x.id===c.id);if(i>=0)S.cat[i]=c;else S.cat.push(c)}
 function rHist(){
   const f=$('fOrang').value;let L=S.cat.slice().sort((a,b)=>String(b.tgl).localeCompare(String(a.tgl))||b.id-a.id);
-  if(f)L=L.filter(c=>c.byr==f||c.bagi[f]!==undefined);
+  if(f)L=L.filter(c=>pembayar(c).includes(+f)||c.bagi[f]!==undefined);
   $('hist').innerHTML=L.length?L.map(c=>{const v=idr(c),asli=asing(c.mu)?(MATA[c.mu]?MATA[c.mu].s:c.mu+' ')+Math.round(c.jml).toLocaleString('en-US')+' × '+fK(c.kurs)+' = ':'';
-    const d=`Dibayar <b>${esc(nama(c.byr))}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
+    const d=`Dibayar <b>${pembayar(c).map(i=>esc(nama(i))+(c.byrs?' ('+(asing(c.mu)?MATA[c.mu].s+' ':'Rp ')+Math.abs(Math.round(c.byrs[i])).toLocaleString('id-ID')+')':'')).join(' + ')}</b> · untuk ${Object.keys(c.bagi).map(k=>esc(nama(+k))).join(', ')}`;
     return `<div class="hist"><div class="h1"><span>${(IKON[c.kat]||'🍡')+' '}${esc(c.ket)}</span><span>${fIDR(v)}</span></div><div class="h2">${esc(c.tgl)} · ${esc(c.kat)}${asli?' · '+asli+fIDR(v):''}<br>${d}</div><div class="act"><button class="btn ghost small" data-e="${c.id}">Ubah</button><button class="btn ghost small" data-h="${c.id}" style="color:var(--minus)">Hapus</button></div></div>`}).join(''):'<div class="empty">Belum ada catatan.</div>';
 }
 function rOrang(){
@@ -514,7 +528,7 @@ $('kursList').onchange=e=>{const i=e.target.closest('input[data-m]');if(!i)retur
 $('hist').onclick=e=>{const h=e.target.closest('[data-h]'),ed=e.target.closest('[data-e]');
   if(h){if(confirm('Hapus catatan ini?')){S.cat=S.cat.filter(c=>c.id!==+h.dataset.h);simpanS();rAll()}return}
   if(ed){const c=S.cat.find(x=>x.id===+ed.dataset.e);if(!c)return;resetForm();editId=c.id;$('addTitle').textContent='Ubah catatan';$('batal').classList.remove('hide');setJenis('x');
-    {$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=Math.abs(c.jml);$('refund').checked=c.jml<0;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;
+    {$('ket').value=c.ket;$('tgl').value=c.tgl;$('kat').value=c.kat;$('jml').value=Math.abs(c.jml);$('refund').checked=c.jml<0;$('mu').value=c.mu;$('kurs').value=c.kurs;pakaiSet=new Set(Object.keys(c.bagi).map(Number));rForm();$('byr').value=c.byr;if(c.byrs){const ids=Object.keys(c.byrs).map(Number),b2=ids.find(i=>i!==c.byr);$('byr2').value=b2;$('byr1amt').value=Math.abs(c.byrs[c.byr]);$('byr2Box').classList.remove('hide')}else{$('byr2').value='';$('byr1amt').value='';$('byr2Box').classList.add('hide')}
       const rata=Object.values(c.bagi).every(v=>Math.abs(v-c.jml/pakaiSet.size)<0.01);$('mode').value=rata?'rata':'custom';rCustom();if(!rata)document.querySelectorAll('#customBox input').forEach(i=>i.value=Math.abs(c.bagi[i.dataset.id]));}
     tab('add')}};
 resetForm();rAll();
