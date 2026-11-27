@@ -358,7 +358,7 @@ let ROOM=TRIP_ID;
 const newId=()=>Date.now()*1000+Math.floor(Math.random()*1000);   // id unik antar HP
 const simpanS=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(ROOM)pushDiff()};
 const fIDR=n=>(n<0?'−':'')+'Rp '+Math.round(Math.abs(n)).toLocaleString('id-ID');
-const num=v=>{v=String(v||'').trim().replace(/\s/g,'');if(!v)return NaN;if(/,/.test(v)&&/\./.test(v))v=v.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');else v=v.replace(',','.');return parseFloat(v)};
+const num=v=>{v=String(v||'').trim().replace(/\s/g,'');if(!v)return NaN;if(/,/.test(v)&&/\./.test(v))v=v.replace(/\./g,'').replace(',','.');else if(/^[1-9]\d{0,2}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');else v=v.replace(',','.');return parseFloat(v)};
 const nama=id=>{const o=S.orang.find(x=>x.id===id);return o?o.nama:'(dihapus)'};
 const toast=t=>{const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1800)};
 const hariIni=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
